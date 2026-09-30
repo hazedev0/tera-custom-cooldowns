@@ -211,8 +211,16 @@ public static class Game
 
     private static async Task InitDatabases(string lang)
     {
-        await UpdateManager.CheckDatabaseHash();
-        UpdateManager.CheckServersFile();
+        if (App.Settings.DisableDataUpdates)
+        {
+            // without remote hashes, CheckVersion() skips the hash check and local files are kept
+            Log.F("Data updates are disabled in settings, using local databases.");
+        }
+        else
+        {
+            await UpdateManager.CheckDatabaseHash();
+            UpdateManager.CheckServersFile();
+        }
         var samedb = DB?.Language == lang;
         var updated = false;
         if (!samedb)

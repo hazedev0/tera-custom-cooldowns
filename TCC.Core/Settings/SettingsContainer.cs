@@ -50,6 +50,7 @@ public class SettingsContainer
     public bool BetaNotification { get; set; }
     public bool FpsAtGuardian { get; set; }
     public bool IntegratedGpuSleepWorkaround { get; set; }
+    public bool DisableDataUpdates { get; set; } // keeps local databases and icons instead of checking/downloading remote ones
 
     public bool EnableProxy
     {

@@ -172,7 +172,7 @@ public partial class App
         // ----------------------------
         SplashScreen.VM.Progress = 70;
         SplashScreen.VM.BottomText = /*Random.NextDouble() <= 0.4 ? "Ok but where is my flying EX-TRM????" :*/ "Checking for icon database updates...";
-        _ = Task.Run(() => new IconsUpdater().CheckForUpdates());
+        if (!Settings.DisableDataUpdates) _ = Task.Run(() => new IconsUpdater().CheckForUpdates());
 
         // ----------------------------
         SplashScreen.VM.Progress = 80;

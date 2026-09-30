@@ -19,6 +19,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugToolbox|AnyCPU'">
     <PostBuildEvent>
       xcopy $(SolutionDir)\TCC.Core\Module\ "$(TOOLBOX_TCC_PATH)" /y /s
+      powershell -NoProfile -Command "$f = '$(TOOLBOX_TCC_PATH)\module.json'; (Get-Content $f -Raw) -replace '\"disableAutoUpdate\":\s*false', '\"disableAutoUpdate\": true' | Set-Content $f -NoNewline"
     </PostBuildEvent>
   </PropertyGroup>
 </Project>
