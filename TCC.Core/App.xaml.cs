@@ -239,7 +239,7 @@ public partial class App
     {
         _running = false;
         PacketAnalyzer.Sniffer.Enabled = false;
-        Settings.Save();
+        Settings.Save(wait: true);
         WindowManager.Dispose();
         StubInterface.Instance.Disconnect();
         UpdateManager.StopTimer();

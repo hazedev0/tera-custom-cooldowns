@@ -272,11 +272,13 @@ public class SettingsContainer
         return settings;
     }
 
-    public void Save()
+    /// <param name="wait">write the file before returning; needed when the app is about to exit</param>
+    public void Save(bool wait = false)
     {
         var toRemove = ChatWindowsSettings.Where(s => s.Tabs.Count == 0).ToList();
         foreach (var s in toRemove) ChatWindowsSettings.Remove(s);
-        App.BaseDispatcher.InvokeAsync(() => new JsonSettingsWriter().Save());
+        if (wait) App.BaseDispatcher.Invoke(() => new JsonSettingsWriter().Save());
+        else App.BaseDispatcher.InvokeAsync(() => new JsonSettingsWriter().Save());
     }
 }
 
