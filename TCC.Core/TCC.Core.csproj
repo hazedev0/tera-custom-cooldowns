@@ -113,7 +113,6 @@
 		<PackageReference Include="Nostrum.WPF" Version="1.2.29" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\..\TCC.Loader\TCC.Loader\TCC.Loader.csproj" />
 		<ProjectReference Include="..\TCC.Interop\TCC.Interop.csproj" />
 		<ProjectReference Include="..\TCC.Utils\TCC.Utils.csproj" />
 		<ProjectReference Include="..\TeraDataLite\TeraDataLite.csproj" />

@@ -17,7 +17,6 @@ using Nostrum.WPF.Extensions;
 using TCC.Data;
 using TCC.Interop;
 using TCC.Interop.Proxy;
-using TCC.Loader;
 using TCC.Notice;
 using TCC.Settings;
 using TCC.UI;
@@ -178,7 +177,6 @@ public partial class App
         // ----------------------------
         SplashScreen.VM.Progress = 80;
         SplashScreen.VM.BottomText = /*Random.NextDouble() <= 0.4 ? "Just move to Genshin Impact :kekw:" :*/ "Initializing packet processor...";
-        PacketAnalyzer.ProcessorReady += LoadModules;
         PacketAnalyzer.InitServerDatabase(DataPath, Path.Combine(ResourcesPath, "config/server-overrides.txt"), string.IsNullOrEmpty(Settings.LastLanguage)
             ? "EU-EN"
             : Settings.LastLanguage);
@@ -273,27 +271,6 @@ public partial class App
             catch (Exception e)
             {
                 Log.F($"Failed to release mutex: {e}");
-            }
-        });
-    }
-
-    private static void LoadModules()
-    {
-        BaseDispatcher.Invoke(() =>
-        {
-            try
-            {
-                ModuleLoader.LoadModules(BasePath);
-            }
-            catch (FileLoadException fle)
-            {
-                TccMessageBox.Show("TCC module loader", SR.ErrorWhileLoadingModule(fle.FileName), MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
-            }
-            catch (FileNotFoundException fnfe)
-            {
-                TccMessageBox.Show("TCC module loader", SR.ErrorWhileLoadingModule(Path.GetFileName(fnfe.FileName)), MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
             }
         });
     }
