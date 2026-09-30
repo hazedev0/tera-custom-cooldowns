@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Nostrum;
@@ -39,7 +35,6 @@ public class GameEventManager : ThreadSafeObservableObject
     };
 
     public const double SecondsInDay = 60 * 60 * 24;
-    private const string BaseUrl = "https://tcc-web-99a64.firebaseapp.com/bam"; //  todo: replace this
 
     public int ResetHour;
     public RegionEnum CurrentRegion { get; set; }
@@ -122,53 +117,6 @@ public class GameEventManager : ThreadSafeObservableObject
         App.Settings.Save();
     }
 
-    private async Task<long> DownloadGuildBamTimestamp()
-    {
-        try
-        {
-            var sb = new StringBuilder(BaseUrl);
-            sb.Append("?srv=");
-            sb.Append(Game.Server.ServerId);
-            sb.Append("&reg=");
-            sb.Append(CurrentRegion);
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-            var c = MiscUtils.GetDefaultHttpClient();
-
-            var data = await c.GetStringAsync(sb.ToString());
-            return long.Parse(data);
-
-        }
-        catch
-        {
-
-            Log.Chat(SR.CannotRetrieveGbamInfo);
-            Log.N("Guild BAM", SR.CannotRetrieveGbamInfo, NotificationType.Error);
-
-            return 0;
-        }
-    }
-
-    public void UploadGuildBamTimestamp()
-    {
-        try
-        {
-            var c = MiscUtils.GetDefaultHttpClient();
-            c.PostAsync($"{BaseUrl}?srv={Game.Server.ServerId}&reg={CurrentRegion}&post", new ByteArrayContent([]));
-        }
-        catch
-        {
-            Log.Chat(SR.CannotUploadGbamInfo);
-            Log.N("Guild BAM", SR.CannotUploadGbamInfo, NotificationType.Error);
-        }
-
-    }
-    public async Task<DateTime> RetrieveGuildBamDateTime()
-    {
-        var t = await DownloadGuildBamTimestamp();
-        return TimeUtils.FromUnixTime(t);
-    }
-
     public static void ExecuteGuildBamWebhook(bool testMessage = false)
     {
         if (!App.Settings.WebhookEnabledGuildBam) return;
@@ -199,7 +147,7 @@ public class GameEventManager : ThreadSafeObservableObject
 
     private static void SendWebhook(string content, string url, bool test = false)
     {
-        Discord.FireWebhook(url, $"{content}{(test ? " (test message)" : "")}", App.AppVersion, Game.CurrentAccountNameHash);
+        Discord.FireWebhook(url, $"{content}{(test ? " (test message)" : "")}", App.AppVersion);
     }
 
     private struct TeraServerTimeInfo

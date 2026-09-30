@@ -134,6 +134,9 @@ public class JsonSettingsReader : SettingsReaderBase
 
                     ret.AbnormalitySettings.Self.ShowAll = ret.BuffWindowSettings.ShowAll;
                     ret.AbnormalitySettings.Group.ShowAll = ret.GroupWindowSettings.ShowAllAbnormalities;
+
+                    // was only updated after sending usage stats, which were removed; mark the migration as done
+                    ret.StatSentVersion = App.AppVersion;
                 }
 
 #pragma warning restore CS0612 // Il tipo o il membro è obsoleto

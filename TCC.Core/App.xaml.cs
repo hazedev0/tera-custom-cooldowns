@@ -242,7 +242,6 @@ public partial class App
         Settings.Save();
         WindowManager.Dispose();
         StubInterface.Instance.Disconnect();
-        Firebase.Dispose();
         UpdateManager.StopTimer();
         if (releaseMutex)
         {

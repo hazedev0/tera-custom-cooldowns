@@ -21,6 +21,7 @@ using TCC.Utils;
 using TCC.ViewModels;
 using TCC.ViewModels.ClassManagers;
 using TeraDataLite;
+using TeraPacketParser.TeraCommon.Game;
 using Brushes = TCC.R.Brushes;
 using Colors = TCC.R.Colors;
 using FusionElements = TCC.Data.FusionElements;
@@ -29,6 +30,20 @@ namespace TCC.Utilities;
 
 public static class TccUtils
 {
+    /// <summary>
+    /// Name to show in "Connected to ..." messages. Toolbox reports the server list's internal
+    /// name, which can differ from the name players see. Only for display: chat and whisper
+    /// code keep using <see cref="Server.Name"/>.
+    /// </summary>
+    public static string GetServerDisplayName(Server srv)
+    {
+        return srv.Name switch
+        {
+            "Agaia-RU" => "Agaia",
+            _ => srv.Name
+        };
+    }
+
     public static Geometry SvgClass(Class c)
     {
         return c switch
@@ -201,7 +216,7 @@ public static class TccUtils
         //var txt = GetPlainText(message).UnescapeHtml();
         //var chStr = new ChatChannelToName().Convert(ch, null, null, null);
 
-        Discord.FireWebhook(App.Settings.WebhookUrlMentions, message, discordUsername, Game.CurrentAccountNameHash); //string.IsNullOrEmpty(discordTextOverride) ? $"**{author}** `{chStr}`\n{txt}" : discordTextOverride);
+        Discord.FireWebhook(App.Settings.WebhookUrlMentions, message, discordUsername); //string.IsNullOrEmpty(discordTextOverride) ? $"**{author}** `{chStr}`\n{txt}" : discordTextOverride);
     }
 
     public static void CheckWindowNotify(string message, string title)

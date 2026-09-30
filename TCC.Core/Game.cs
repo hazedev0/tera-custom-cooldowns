@@ -429,7 +429,6 @@ public static class Game
     {
         WindowManager.TrayIcon.Connected = false;
         WindowManager.TrayIcon.Text = $"{App.AppVersion} - not connected";
-        Firebase.Dispose();
         Me.ClearAbnormalities();
         Logged = false;
         LoadingScreen = true;
@@ -842,8 +841,6 @@ public static class Game
         }
 
         Logged = false;
-        Firebase.RegisterWebhook(App.Settings.WebhookUrlGuildBam, false, CurrentAccountNameHash);
-        Firebase.RegisterWebhook(App.Settings.WebhookUrlFieldBoss, false, CurrentAccountNameHash);
         Me.ClearAbnormalities();
 
         foreach (var item in m.CharacterList)
@@ -958,12 +955,6 @@ public static class Game
                 : App.Settings.LastAccountNameHash
             : CurrentAccountNameHash;
 
-        if (!string.IsNullOrEmpty(account))
-        {
-            Firebase.RegisterWebhook(App.Settings.WebhookUrlGuildBam, true, account);
-            Firebase.RegisterWebhook(App.Settings.WebhookUrlFieldBoss, true, account);
-        }
-
         if (!string.IsNullOrEmpty(account)
             // && (App.Settings.StatSentVersion != App.AppVersion ||
             // App.Settings.StatSentTime.Month != DateTime.UtcNow.Month ||
@@ -996,27 +987,6 @@ public static class Game
             GameEventManager.Instance.SetServerTimeZone(App.Settings.LastLanguage);
             await InitDatabasesAsync(App.Settings.LastLanguage);
             SetAbnormalityTracker(m.CharacterClass);
-
-            bool isDailyFirst = App.Settings.StatSentTime.Month == DateTime.Now.Month &&
-                            App.Settings.StatSentTime.Day == DateTime.Now.Day &&
-                            App.Settings.StatSentVersion != App.AppVersion;
-
-
-            _ = Task.Run(async () =>
-            {
-                if (await Cloud.SendUsageStatAsync(Server.Region,
-                                                   Server.ServerId,
-                                                   Server.Ip,
-                                                   Server.Name,
-                                                   account,
-                                                   App.AppVersion,
-                                                   isDailyFirst))
-                {
-                    App.Settings.StatSentTime = DateTime.UtcNow;
-                    App.Settings.StatSentVersion = App.AppVersion;
-                    App.Settings.Save();
-                }
-            });
         }
     }
 

@@ -82,8 +82,7 @@ public static class SystemMessagesProcessor
         var msg = ChatManager.Instance.Factory.CreateSystemMessage(parameters, template, (ChatChannel)template.ChatChannel);
         Log.N("Guild BAM", msg.ToString(), NotificationType.Info, 2 * 60 * 1000);
         ChatManager.Instance.AddChatMessage(msg);
-        GameEventManager.Instance.UploadGuildBamTimestamp();
-        WindowManager.ViewModels.DashboardVM.SetGuildBamTime(true);
+        WindowManager.ViewModels.DashboardVM.SetGuildBamTime();
         GameEventManager.ExecuteGuildBamWebhook();
     }
 

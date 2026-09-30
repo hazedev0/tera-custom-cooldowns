@@ -2074,11 +2074,6 @@
                                                    IsEnabled="{Binding WebhookEnabledGuildBam}"
                                                    Value="{Binding WebhookUrlGuildBam, Mode=TwoWay}" />
                             <settings:FieldSetting SettingName="Message" Value="{Binding WebhookMessageGuildBam, Mode=TwoWay}" IsEnabled="{Binding WebhookEnabledGuildBam}"/>
-                            <Button Style="{StaticResource SettingsButton}" 
-                                    IsEnabled="{Binding WebhookEnabledGuildBam}"
-                                    Command="{Binding RegisterWebhookCommand}"
-                                    CommandParameter="{Binding WebhookUrlGuildBam}"
-                                    Content="Confirm" />
                         </StackPanel>
                         <!-- Field boss -->
                         <StackPanel VerticalAlignment="Stretch" Grid.Column="0" Grid.Row="1">
@@ -2091,11 +2086,6 @@
                                                    Value="{Binding WebhookUrlFieldBoss, Mode=TwoWay}" />
                             <settings:FieldSetting SettingName="Spawn message" Value="{Binding WebhookMessageFieldBossSpawn, Mode=TwoWay}" IsEnabled="{Binding WebhookEnabledFieldBoss}"/>
                             <settings:FieldSetting SettingName="Death message" Value="{Binding WebhookMessageFieldBossDie, Mode=TwoWay}" IsEnabled="{Binding WebhookEnabledFieldBoss}"/>
-                            <Button Style="{StaticResource SettingsButton}" 
-                                    IsEnabled="{Binding WebhookEnabledFieldBoss}"
-                                    CommandParameter="{Binding WebhookUrlFieldBoss}"
-                                    Command="{Binding RegisterWebhookCommand}"
-                                    Content="Confirm" />
                         </StackPanel>
                         <!-- Mentions -->
                         <StackPanel VerticalAlignment="Stretch" Grid.Column="0" Grid.Row="2">

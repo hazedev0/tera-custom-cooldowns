@@ -154,7 +154,7 @@ public class ChatManager : TccWindowViewModel
 
     private void OnConnected(Server srv)
     {
-        AddTccMessage($"Connected to {srv.Name}.");
+        AddTccMessage($"Connected to {TccUtils.GetServerDisplayName(srv)}.");
     }
 
     private void OnDisconnected()

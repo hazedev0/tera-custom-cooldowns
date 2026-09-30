@@ -2,7 +2,6 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
@@ -62,17 +61,12 @@ public static class GlobalExceptionHandler
                 }
             default:
                 {
-                    var res = TccMessageBox.Show("TCC", SR.FatalErrorAskUpload, MessageBoxButton.YesNo, MessageBoxImage.Error);
-                    if (res == MessageBoxResult.Yes)
-                    {
-                        UploadCrashReport(js);
-                    }
+                    TccMessageBox.Show("TCC", SR.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
                     break;
                 }
         }
 
         StubInterface.Instance.Disconnect();
-        Firebase.Dispose();
 
         if (ex is not DeadlockException)
         {
@@ -106,25 +100,5 @@ public static class GlobalExceptionHandler
         sb.AppendLine("threads");
         sb.AppendLine($"{js["thread_traces"]}");
         Log.F(sb.ToString(), "crash.log");
-    }
-
-    private static void UploadCrashReport(JObject js)
-    {
-        try
-        {
-            using var c = new HttpClient();
-            c.DefaultRequestHeaders.Add("User-Agent", "TCC/Windows");
-            var req = new HttpRequestMessage(HttpMethod.Post, "https://foglio.ns0.it/tcc/api/crash-reports/upload")
-            {
-                Content = new StringContent(Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(js.ToString())))
-            };
-            req.Content.Headers.ContentType!.MediaType = "application/json";
-            var task = c.SendAsync(req);
-            task.Wait();
-        }
-        catch (Exception e)
-        {
-            Log.F($"Failed to upload crash report: {e}");
-        }               
     }
 }

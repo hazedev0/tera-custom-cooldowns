@@ -524,7 +524,6 @@ public class DashboardViewModel : TccWindowViewModel
     private void OnLogin(S_LOGIN m)
     {
         SetLoggedIn(m.PlayerId);
-        SetGuildBamTime(false);
     }
 
     private void OnGetUserList(S_GET_USER_LIST m)
@@ -605,7 +604,6 @@ public class DashboardViewModel : TccWindowViewModel
     {
         ClearEvents();
         LoadEventFile(today, region);
-        if (Game.Logged) SetGuildBamTime(false);
 
     }
     public void ClearEvents()
@@ -844,7 +842,7 @@ public class DashboardViewModel : TccWindowViewModel
         });
     }
 
-    public void SetGuildBamTime(bool force)
+    public void SetGuildBamTime()
     {
         lock (_eventLock)
         {
@@ -852,7 +850,7 @@ public class DashboardViewModel : TccWindowViewModel
             {
                 foreach (var ev in eg.Events.ToSyncList())
                 {
-                    ev.UpdateFromServer(force);
+                    ev.SetHappenedNow();
                 }
             }
         }

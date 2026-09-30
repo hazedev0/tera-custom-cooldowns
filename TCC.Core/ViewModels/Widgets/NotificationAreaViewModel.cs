@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using Nostrum.WPF.ThreadSafe;
 using TCC.Settings.WindowSettings;
 using TCC.UI.Windows.Widgets;
+using TCC.Utilities;
 using TCC.Utils;
 using TeraPacketParser.Analysis;
 using TeraPacketParser.Messages;
@@ -35,7 +36,7 @@ public class NotificationAreaViewModel : TccWindowViewModel
 
     private void OnNewConnection(Server srv)
     {
-        Enqueue("TCC", SR.ConnectedToServer(srv.Name), NotificationType.Success,
+        Enqueue("TCC", SR.ConnectedToServer(TccUtils.GetServerDisplayName(srv)), NotificationType.Success,
             template: NotificationTemplate.Progress,
             forcedId: 10241024);
 

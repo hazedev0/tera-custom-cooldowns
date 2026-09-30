@@ -9,10 +9,8 @@ namespace TCC.Interop;
 
 public static class Discord
 {
-    public static async void FireWebhook(string webhook, string message, string usernameOverride, string accountHash)
+    public static async void FireWebhook(string webhook, string message, string usernameOverride)
     {
-        if (!await Firebase.RequestWebhookExecution(webhook, accountHash)) return;
-
         try
         {
             using var client = MiscUtils.GetDefaultHttpClient();

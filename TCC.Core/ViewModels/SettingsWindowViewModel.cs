@@ -54,7 +54,6 @@ public class SettingsWindowViewModel : ThreadSafeObservableObject
     public WindowSettingsBase PerfMonitorSettings => App.Settings.PerfMonitorSettings;
 
     public ICommand BrowseUrlCommand { get; }
-    public ICommand RegisterWebhookCommand { get; }
     public ICommand OpenWindowCommand { get; }
     public ICommand DownloadBetaCommand { get; }
     public ICommand ResetChatPositionsCommand { get; }
@@ -783,8 +782,6 @@ public class SettingsWindowViewModel : ThreadSafeObservableObject
             if (strUrl == null) return;
             Utils.Utilities.OpenUrl(strUrl);
         });
-        RegisterWebhookCommand = new RelayCommand(webhook => Firebase.RegisterWebhook(webhook?.ToString(), true, Game.CurrentAccountNameHash),
-            _ => Game.Logged);
         OpenWindowCommand = new RelayCommand(winType =>
         {
             if (winType == null)

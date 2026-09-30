@@ -46,14 +46,10 @@ public class DailyEvent : ThreadSafeObservableObject
         Color = color;
     }
 
-    public async void UpdateFromServer(bool force = false)
+    public void SetHappenedNow()
     {
-        if (GameEventManager.Instance.CurrentServerTime < Start || _happened) return;
-        var time = force
-            ? GameEventManager.Instance.CurrentServerTime
-            : (await GameEventManager.Instance.RetrieveGuildBamDateTime()).AddHours(GameEventManager.Instance.ServerHourOffsetFromUtc);
-
-        if (time < Start) return;
+        var time = GameEventManager.Instance.CurrentServerTime;
+        if (time < Start || _happened) return;
         Start = time;
         Duration = TimeSpan.Zero;
         _happened = true;
