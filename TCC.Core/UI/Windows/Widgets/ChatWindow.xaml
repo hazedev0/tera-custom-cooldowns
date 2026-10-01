@@ -202,8 +202,13 @@
                             <BlurEffect Radius="20" />
                         </Border.Effect>
                     </Border>
+                    <!-- Messages background (fill of the main frame, kept separate so frame opacity doesn't affect it) -->
+                    <Border Background="#3445" Grid.ColumnSpan="2" Grid.RowSpan="2" Grid.Row="0"
+                            Opacity="{Binding WindowSettings.BackgroundOpacity}"
+                            Margin="{Binding Margin, ElementName=MainBorder}"
+                            CornerRadius="{Binding CornerRadius, ElementName=MainBorder}" />
                     <!-- Main frame -->
-                    <Border Background="#3445"
+                    <Border Background="Transparent"
                             Opacity="{Binding WindowSettings.FrameOpacity}" x:Name="MainBorder"
                             CornerRadius="1 5 5 5" Grid.ColumnSpan="2" Grid.RowSpan="2" BorderThickness="1 0 1 1"
                             BorderBrush="#8666" Grid.Row="0" VerticalAlignment="Stretch">
@@ -241,6 +246,23 @@
                             <TranslateTransform Y="26" />
                         </Line.RenderTransform>
                     </Line>
+
+                    <!-- Tabs bar: a solid background behind the tabs, e.g. to cover the in-game chat tabs -->
+                    <Border Grid.Row="1" VerticalAlignment="Top" CornerRadius="5 5 0 0"
+                            Background="{StaticResource RevampBackgroundBrush}"
+                            Opacity="{Binding WindowSettings.TabsOpacity}">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <!-- reaches the top of the main frame -->
+                                <Setter Property="Height" Value="25" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding WindowSettings.LfgOn}" Value="True">
+                                        <Setter Property="Height" Value="28" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                    </Border>
 
                     <!-- Main tab control -->
                     <dragablz:TabablzControl Grid.Row="1"
@@ -478,9 +500,13 @@
             <Grid>
                 <Border Style="{StaticResource RevampBorderStyle}" Margin="3" />
                 <StackPanel Width="350" Margin="3">
-                    <settings:ValueSetting SettingName="Background opacity" Foreground="#9fff"
+                    <settings:ValueSetting SettingName="Messages background opacity" Foreground="#9fff"
                                            TextBoxVisibility="Collapsed"
                                            Value="{Binding WindowSettings.BackgroundOpacity,  Mode=TwoWay}"
+                                           Min="0" Max="1" Visibility="Visible" />
+                    <settings:ValueSetting SettingName="Tabs background opacity" Foreground="#9fff"
+                                           TextBoxVisibility="Collapsed"
+                                           Value="{Binding WindowSettings.TabsOpacity,  Mode=TwoWay}"
                                            Min="0" Max="1" Visibility="Visible" />
                     <settings:ValueSetting SettingName="Frame opacity" Foreground="#9fff" TextBoxVisibility="Collapsed"
                                            Value="{Binding WindowSettings.FrameOpacity,  Mode=TwoWay}"

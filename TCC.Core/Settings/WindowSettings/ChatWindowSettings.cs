@@ -10,6 +10,7 @@ public class ChatWindowSettings : WindowSettingsBase
     private bool _fadeOut = true;
     private double _backgroundOpacity = .3;
     private double _frameOpacity = 1;
+    private double _tabsOpacity;
     private bool _lfgOn = true;
     private int _hideTimeout;
     private bool _canCollapse = true;
@@ -49,6 +50,18 @@ public class ChatWindowSettings : WindowSettingsBase
         set
         {
             if (!RaiseAndSetIfChanged(value, ref _frameOpacity)) return;
+            OpacityChanged?.Invoke();
+        }
+    }
+    /// <summary>
+    /// Opacity of the solid bar behind the tabs (at 1 it can cover the in-game chat tabs).
+    /// </summary>
+    public double TabsOpacity
+    {
+        get => _tabsOpacity;
+        set
+        {
+            if (!RaiseAndSetIfChanged(value, ref _tabsOpacity)) return;
             OpacityChanged?.Invoke();
         }
     }
