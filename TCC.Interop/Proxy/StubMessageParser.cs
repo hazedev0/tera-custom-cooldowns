@@ -21,8 +21,17 @@ public class StubMessageParser
         { "handleChatMessage", new Action<JObject>(HandleChatMessage) },
         { "handleRawPacket", new Action<JObject>(HandleRawPacket) },
         { "handleTranslatedMessage", new Action<JObject>(HandleTranslatedMessage) },
-        { "enqueueNotification", new Action<JObject>(HandleEnqueueNotification) }
+        { "enqueueNotification", new Action<JObject>(HandleEnqueueNotification) },
+        { "closeTcc", new Action<JObject>(CloseTcc) }
     };
+
+    /// <summary>
+    /// Sent by the Toolbox module when Toolbox stops, so TCC doesn't keep running on its own.
+    /// </summary>
+    private static void CloseTcc(JObject parameters)
+    {
+        Utilities.RequestClose();
+    }
 
     public static event Action<bool>? SetUiModeEvent;
     public static event Action<bool>? SetChatModeEvent;

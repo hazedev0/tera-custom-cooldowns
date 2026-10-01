@@ -41,7 +41,7 @@ class TccInterface {
         this.server.setNetworkMod(networkMod);
     }
 
-    call(method, params) {
+    buildRequest(method, params) {
         const request = {
             'jsonrpc': "2.0",
             'method': method,
@@ -55,7 +55,12 @@ class TccInterface {
         const data = Buffer.alloc(len + 2);
         data.writeUInt16LE(len);
         data.write(strReq, 2);
-        //this.mod.log("Sending " + data.length + " bytes: " + strReq + "\n" + data);
+        return data;
+    }
+
+    call(method, params) {
+        const data = this.buildRequest(method, params);
+        //this.mod.log("Sending " + data.length + " bytes: " + data);
         let socketsToRemove = [];
 
         connectedClients.forEach(socket => {
@@ -73,8 +78,11 @@ class TccInterface {
     }
 
     destructor() {
+        // Toolbox is stopping: tell TCC to close. end() flushes the request before closing the socket.
+        const closeRequest = this.buildRequest("closeTcc", {});
         connectedClients.forEach(socket => {
-            socket.destroy();
+            if (socket.destroyed) return;
+            socket.end(closeRequest);
         });
         this.interface.close();
         this.server.stop();

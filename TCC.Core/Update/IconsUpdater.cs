@@ -240,7 +240,7 @@ public class IconsUpdater
         try
         {
             Directory.Delete(DownloadedIconsDir, true);
-            File.Delete("icons.zip");
+            File.Delete(Path.Combine(App.BasePath, "icons.zip"));
         }
         catch
         {

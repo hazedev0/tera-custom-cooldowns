@@ -911,7 +911,7 @@ public static class Game
     {
         S_IMAGE_DATA.Database[p.GuildId] = p.GuildLogo;
 
-        if (!Directory.Exists("resources/images/guilds")) Directory.CreateDirectory("resources/images/guilds");
+        Directory.CreateDirectory(Path.Combine(App.ResourcesPath, "images/guilds"));
         try
         {
             var clonebmp = (Bitmap)p.GuildLogo.Clone();
