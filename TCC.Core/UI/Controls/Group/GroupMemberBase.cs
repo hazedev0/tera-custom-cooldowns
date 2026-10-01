@@ -205,6 +205,20 @@ public class GroupMemberBase : UserControl, INotifyPropertyChanged
     protected void ToolTip_OnOpened(object sender, RoutedEventArgs e)
     {
         FocusManager.PauseTopmost = true;
+        FillNearbyLocation();
+    }
+
+    /// <summary>
+    /// The server only sends positions (S_PARTY_MEMBER_INTERVAL_POS_UPDATE) for members far away,
+    /// so me and members in range never get a location: they're where I am.
+    /// </summary>
+    private void FillNearbyLocation()
+    {
+        if (DataContext is not User user) return;
+        var isMe = user.PlayerId == Game.Me.PlayerId && user.ServerId == Game.Me.ServerId;
+        if (!isMe && !user.InRange) return;
+        if (Game.DB!.TryGetGuardOrDungeonNameFromContinentId((uint)Game.CurrentZoneId, out var name))
+            user.Location = name;
     }
     protected void ToolTip_OnClosed(object sender, RoutedEventArgs e)
     {

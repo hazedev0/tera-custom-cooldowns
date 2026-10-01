@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -35,6 +36,7 @@ public class GroupWindowViewModel : TccWindowViewModel
     private bool _firstCheck = true;
     private readonly object _lock = new();
     private bool _leaderOverride;
+    private bool _passLeaderListOpen;
     private ulong _aggroHolder;
 
     public event Action? SettingsUpdated;
@@ -60,6 +62,20 @@ public class GroupWindowViewModel : TccWindowViewModel
     public bool ShowDetails => Formed && ((GroupWindowSettings)Settings!).ShowDetails;
     public bool ShowLeaveButton => Formed && StubInterface.Instance.IsStubAvailable;
     public bool ShowLeaderButtons => Formed && StubInterface.Instance.IsStubAvailable && AmILeader;
+    public bool ShowPassLeaderButton => ShowLeaderButtons && Size > 1;
+
+    public bool PassLeaderListOpen
+    {
+        get => _passLeaderListOpen;
+        set => RaiseAndSetIfChanged(value, ref _passLeaderListOpen);
+    }
+
+    /// <summary>
+    /// Members leadership can be passed to (everyone but me), refreshed when the list is opened.
+    /// </summary>
+    public IReadOnlyList<User> PassLeaderCandidates =>
+        Members.ToSyncList().Where(x => !(x.PlayerId == Game.Me.PlayerId && x.ServerId == Game.Me.ServerId)).ToList();
+
     public bool Rolling { get; set; }
 
     public ICommand ShowLootWindowCommand { get; }
@@ -67,6 +83,8 @@ public class GroupWindowViewModel : TccWindowViewModel
     public ICommand LeaveGroupCommand { get; }
     public ICommand DisbandGroupCommand { get; }
     public ICommand ResetInstanceCommand { get; }
+    public ICommand TogglePassLeaderListCommand { get; }
+    public ICommand PassLeaderCommand { get; }
 
     public GroupWindowViewModel(GroupWindowSettings settings) : base(settings)
     {
@@ -110,6 +128,21 @@ public class GroupWindowViewModel : TccWindowViewModel
         LeaveGroupCommand = new RelayCommand(LeaveGroup);
         DisbandGroupCommand = new RelayCommand(DisbandGroup);
         ResetInstanceCommand = new RelayCommand(ResetInstance);
+        TogglePassLeaderListCommand = new RelayCommand(TogglePassLeaderList);
+        PassLeaderCommand = new RelayCommand(PassLeader);
+    }
+
+    private void TogglePassLeaderList()
+    {
+        if (!PassLeaderListOpen) InvokePropertyChanged(nameof(PassLeaderCandidates));
+        PassLeaderListOpen = !PassLeaderListOpen;
+    }
+
+    private void PassLeader(object? par)
+    {
+        PassLeaderListOpen = false;
+        if (!AmILeader || par is not User u) return;
+        StubInterface.Instance.StubClient.DelegateLeader(u.ServerId, u.PlayerId);
     }
 
     private void ResetInstance()
@@ -176,6 +209,7 @@ public class GroupWindowViewModel : TccWindowViewModel
         InvokePropertyChanged(nameof(AliveCount));
         InvokePropertyChanged(nameof(ReadyCount));
         InvokePropertyChanged(nameof(ShowLeaderButtons));
+        InvokePropertyChanged(nameof(ShowPassLeaderButton));
     }
 
     private void NotifySettingUpdated()
@@ -494,8 +528,10 @@ public class GroupWindowViewModel : TccWindowViewModel
             m.IsLeader = m.Name == name;
         }
         _leaderOverride = name == Game.Me.Name;
+        PassLeaderListOpen = false;
         InvokePropertyChanged(nameof(AmILeader));
         InvokePropertyChanged(nameof(ShowLeaderButtons));
+        InvokePropertyChanged(nameof(ShowPassLeaderButton));
     }
 
     public void StartRoll()
