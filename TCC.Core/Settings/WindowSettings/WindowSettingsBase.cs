@@ -47,6 +47,8 @@ public class WindowSettingsBase : ThreadSafeObservableObject
         {
             if (!RaiseAndSetIfChanged(value, ref _forcedClickable)) return;
             InvokePropertyChanged(nameof(ClickThruMode));
+            // apply it to the window now, not on the next click-through refresh
+            ClickThruModeChanged?.Invoke();
         }
     }
     [JsonIgnore]

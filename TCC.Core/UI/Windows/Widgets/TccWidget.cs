@@ -202,6 +202,8 @@ public class TccWidget : Window
         Handle = new WindowInteropHelper(this).Handle;
         FocusManager.MakeUnfocusable(Handle);
         FocusManager.HideFromToolBar(Handle);
+        // click-through was first applied before the window had a handle
+        OnClickThruModeChanged();
         if (WindowSettings?.Enabled == false) Hide();
     }
 
