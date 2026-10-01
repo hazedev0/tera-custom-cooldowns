@@ -60,6 +60,12 @@ public static class FocusManager
     }
 
     private static int _pausedCount;
+    private static DateTime _pauseChangedAt;
+
+    // Popups, tooltips and menus pause and resume topmost refreshes; one that never resumes (e.g. a
+    // tooltip whose window hid or turned click-through) would stop windows from being put back on top
+    // for good, leaving any that fell behind the game hidden. Pauses expire after this long.
+    private static readonly TimeSpan MaxTopmostPause = TimeSpan.FromSeconds(15);
 
     public static bool PauseTopmost
     {
@@ -69,8 +75,15 @@ public static class FocusManager
             if (value) _pausedCount++;
             else _pausedCount--;
             if (_pausedCount < 0) _pausedCount = 0;
+            _pauseChangedAt = DateTime.UtcNow;
             //Log.CW($"TopMost paused {_pausedCount}");
         }
+    }
+
+    private static void ExpireStaleTopmostPause()
+    {
+        if (_pausedCount == 0 || DateTime.UtcNow - _pauseChangedAt < MaxTopmostPause) return;
+        _pausedCount = 0;
     }
 
     private static IntPtr TeraWindow => User32.FindWindow("LaunchUnrealUWindowsClient", "TERA");
@@ -188,6 +201,7 @@ public static class FocusManager
     private static void CheckForegroundWindow(object? sender, ElapsedEventArgs e)
     {
         if (_disposed) return;
+        ExpireStaleTopmostPause();
         if (!PauseTopmost) FocusTick?.Invoke();
         if (IsForeground == IsActive) return;
         IsForeground = IsActive;
