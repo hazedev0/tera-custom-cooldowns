@@ -145,6 +145,34 @@ public class LootDistributionViewModel : TccWindowViewModel
         Game.LootDistributionWindowShowRequest += OnShowRequest;
     }
 
+    /// <summary>
+    /// Loot distribution trace, written to logs/loot.log to diagnose the window hiding or losing items.
+    /// </summary>
+    private static readonly object TraceLock = new();
+
+    private static void Trace(string line)
+    {
+        try
+        {
+            lock (TraceLock)
+            {
+                var dir = System.IO.Path.Combine(App.BasePath, "logs");
+                System.IO.Directory.CreateDirectory(dir);
+                System.IO.File.AppendAllText(System.IO.Path.Combine(dir, "loot.log"), $"{DateTime.Now:HH:mm:ss.fff} {line}\n");
+            }
+        }
+        catch
+        {
+            // diagnostics only
+        }
+    }
+
+    private void Hide(string reason)
+    {
+        Trace($"! hiding loot window: {reason} (items in list: {DistributionList.Count}, items left: {ItemsLeftAmount})");
+        _settings.Visible = false;
+    }
+
     private void OnShowRequest()
     {
         _settings.Visible = true;
@@ -183,7 +211,7 @@ public class LootDistributionViewModel : TccWindowViewModel
     private void OnClearTick(object? sender, EventArgs e)
     {
         _clear.Stop();
-        _settings.Visible = false;
+        Hide("no items left, 10 s after the last result");
         ClearLoot();
     }
 
@@ -196,7 +224,7 @@ public class LootDistributionViewModel : TccWindowViewModel
     private void OnLoginStatusChanged()
     {
         if (Game.Logged) return;
-        _settings.Visible = false;
+        Hide("logged out");
         ClearAll();
     }
 
@@ -205,7 +233,7 @@ public class LootDistributionViewModel : TccWindowViewModel
         base.OnEnabledChanged(enabled);
         if (!enabled)
         {
-            _settings.Visible = false;
+            Hide("window disabled");
             ClearLoot();
         }
 
@@ -295,6 +323,7 @@ public class LootDistributionViewModel : TccWindowViewModel
 
     private void OnGroupCompositionChanged(ReadOnlyCollection<GroupMemberData> members, GroupCompositionChangeReason reason)
     {
+        Trace($"> group composition {reason}: {members.Count} members");
         switch (reason)
         {
             case GroupCompositionChangeReason.Created:
@@ -304,7 +333,7 @@ public class LootDistributionViewModel : TccWindowViewModel
             case GroupCompositionChangeReason.Disbanded:
                 PacketAnalyzer.Processor.Unhook<S_SPAWN_DROPITEM>(OnSpawnDropitem);
 
-                _settings.Visible = false;
+                Hide("group disbanded");
                 ClearLoot();
                 if (_clear.IsEnabled) _clear.Stop();
 
@@ -376,7 +405,7 @@ public class LootDistributionViewModel : TccWindowViewModel
     /// </summary>
     private void OnAskBiddingRareItem(S_ASK_BIDDING_RARE_ITEM m)
     {
-        Log.CW($"> S_ASK_BIDDING_RARE_ITEM: itemId:{m.ItemId} amount:{m.Amount}");
+        Trace($"> S_ASK_BIDDING_RARE_ITEM: itemId:{m.ItemId} amount:{m.Amount}");
 
         if (_clear.IsEnabled) _clear.Stop();
 
@@ -389,29 +418,29 @@ public class LootDistributionViewModel : TccWindowViewModel
 
         var items = DistributionList.ToSyncList().Where(x => x.Item.ItemId == m.ItemId
                                                           && x.Item.Amount == m.Amount).ToArray();
-        Log.CW($"  found {items.Length} candidates");
+        Trace($"  found {items.Length} candidates");
 
         LootItemViewModel? item;
 
         if (_amountsDistributed.TryGetValue((m.ItemId, m.Amount), out var amount) && amount < items.Length)
         {
             item = items[amount];
-            Log.CW($"  found {item.DbItem.Name} in distributed items");
+            Trace($"  found {item.DbItem.Name} in distributed items");
         }
         else
         {
             item = items.FirstOrDefault();
-            Log.CW($"  item not found in distributed items at idx={amount}, trying to use first");
+            Trace($"  item not found in distributed items at idx={amount}, trying to use first");
         }
 
         if (item != null)
         {
             item.DistributionStatus = DistributionStatus.Distributing;
-            Log.CW($"  item {item.DbItem.Name} set as Distributing");
+            Trace($"  item {item.DbItem.Name} set as Distributing");
         }
         else
         {
-            Log.CW("! item is still null, creating new one as Distributing");
+            Trace("! item is still null, creating new one as Distributing");
 
             Dispatcher.Invoke(() =>
             {
@@ -452,7 +481,7 @@ public class LootDistributionViewModel : TccWindowViewModel
     /// </summary>
     private void OnUpdateItemBiddingCount(S_UPDATE_BIDDING_COUNT p)
     {
-        Log.CW($"> S_UPDATE_BIDDING_COUNT.count = {p.Count}");
+        Trace($"> S_UPDATE_BIDDING_COUNT.count = {p.Count}");
         ItemsLeftAmount = p.Count + 1;
     }
 
@@ -461,20 +490,20 @@ public class LootDistributionViewModel : TccWindowViewModel
     /// </summary>
     private void OnResultBiddingDiceThrow(S_RESULT_BIDDING_DICE_THROW m)
     {
-        Log.CW($"> S_RESULT_BIDDING_DICE_THROW: gameId:{m.EntityId} result:{m.RollResult}");
+        Trace($"> S_RESULT_BIDDING_DICE_THROW: gameId:{m.EntityId} result:{m.RollResult}");
 
         if (Game.IsMe(m.EntityId) || Game.IsMe(m.PlayerId, m.ServerId))
         {
-            Log.CW("  roll result is from player");
+            Trace("  roll result is from player");
             if (ItemInDistribution != null)
             {
-                Log.CW("  setting BidSent to true");
+                Trace("  setting BidSent to true");
                 ItemInDistribution.BidIntent = m.RollResult != -1 ? BidAction.Roll : BidAction.Pass;
                 ItemInDistribution.BidSent = true;
             }
             else
             {
-                Log.CW("!  no items in distribution not found");
+                Trace("!  no items in distribution not found");
             }
 
             _commitDelay.Stop();
@@ -489,7 +518,7 @@ public class LootDistributionViewModel : TccWindowViewModel
 
         if (member != null)
         {
-            Log.CW($"  saving roll for group member {member.Member.Name}");
+            Trace($"  saving roll for group member {member.Member.Name}");
             member.Roll = m.RollResult;
             member.BidAction = m.RollResult == -1 ? BidAction.Pass : BidAction.Roll;
         }
@@ -497,7 +526,7 @@ public class LootDistributionViewModel : TccWindowViewModel
         {
             var csv = members.Aggregate("", (current, m2) => current + $"{m2.Member.EntityId}:{m2.Member.Name} | ");
 
-            Log.CW($"! group member ({m.EntityId}) not found: {csv}");
+            Trace($"! group member ({m.EntityId}) not found: {csv}");
         }
 
         // refresh winning status
@@ -516,7 +545,7 @@ public class LootDistributionViewModel : TccWindowViewModel
     /// </summary>
     private void OnResultItemBidding(S_RESULT_ITEM_BIDDING p)
     {
-        Log.CW("> S_RESULT_ITEM_BIDDING");
+        Trace("> S_RESULT_ITEM_BIDDING");
 
         var members = Members.ToSyncList();
 
@@ -525,7 +554,7 @@ public class LootDistributionViewModel : TccWindowViewModel
         if (members.All(m => m.Roll < 1))
         {
             foreach (var m in members) m.BidAction = BidAction.Pass;
-            Log.CW("  no rolls for current item");
+            Trace("  no rolls for current item");
         }
         else
         {
@@ -539,28 +568,28 @@ public class LootDistributionViewModel : TccWindowViewModel
                 ItemInDistribution.WinnerName = winner.Member.Name;
                 ItemInDistribution.WinnerRoll = winner.Roll;
                 ItemInDistribution.DistributionStatus = DistributionStatus.Distributed;
-                Log.CW($"  item {ItemInDistribution.DbItem.Name} won by {winner.Member.Name}");
+                Trace($"  item {ItemInDistribution.DbItem.Name} won by {winner.Member.Name}");
             }
             else
             {
                 ItemInDistribution.DistributionStatus = DistributionStatus.Discarded;
-                Log.CW($"  winner is null, item {ItemInDistribution.DbItem.Name} set as Discarded");
+                Trace($"  winner is null, item {ItemInDistribution.DbItem.Name} set as Discarded");
             }
 
             if (_amountsDistributed.TryGetValue((ItemInDistribution.Item.ItemId, ItemInDistribution.Item.Amount), out var amount))
             {
                 _amountsDistributed[(ItemInDistribution.Item.ItemId, ItemInDistribution.Item.Amount)] = amount + 1;
-                Log.CW($"  incrementing distributed amount of item {ItemInDistribution.Item.ItemId},{ItemInDistribution.Item.Amount}");
+                Trace($"  incrementing distributed amount of item {ItemInDistribution.Item.ItemId},{ItemInDistribution.Item.Amount}");
             }
             else
             {
                 _amountsDistributed[(ItemInDistribution.Item.ItemId, ItemInDistribution.Item.Amount)] = 1;
-                Log.CW($"  item {ItemInDistribution.Item.ItemId},{ItemInDistribution.Item.Amount} not distributed, setting distributed amount to 1");
+                Trace($"  item {ItemInDistribution.Item.ItemId},{ItemInDistribution.Item.Amount} not distributed, setting distributed amount to 1");
             }
         }
         else
         {
-            Log.CW("!  item in distribution not found");
+            Trace("!  item in distribution not found");
         }
 
         _countdown.Stop();
@@ -578,11 +607,11 @@ public class LootDistributionViewModel : TccWindowViewModel
     /// </summary>
     private void OnSetItemBiddingFlag(S_SET_ITEM_BIDDING_FLAG p)
     {
-        Log.CW($"> S_SET_ITEM_BIDDING_FLAG: gameId:{p.GameId} flag:{p.Flag}");
+        Trace($"> S_SET_ITEM_BIDDING_FLAG: gameId:{p.GameId} flag:{p.Flag}");
 
         if (!p.Flag)
         {
-            Log.CW("  flag is false, returning");
+            Trace("  flag is false, returning");
             return;
         }
 
@@ -591,7 +620,7 @@ public class LootDistributionViewModel : TccWindowViewModel
 
         if (existing != null)
         {
-            Log.CW("  item was in DistributionList, reverting it to Waiting");
+            Trace("  item was in DistributionList, reverting it to Waiting");
             existing.DistributionStatus = DistributionStatus.Waiting;
 
             if (_settings.AlwaysPass) existing.BidIntent = BidAction.Pass;
@@ -599,10 +628,10 @@ public class LootDistributionViewModel : TccWindowViewModel
         }
         else
         {
-            Log.CW("  item was not in DistributionList, moving it from dropped items");
+            Trace("  item was not in DistributionList, moving it from dropped items");
             var dropItem = _droppedItems.TryGetValue(p.GameId, out var di) ? di : new DropItem(p.GameId, 0, 0);
 
-            Log.CW($"  dropped item is {dropItem.ItemId}");
+            Trace($"  dropped item is {dropItem.ItemId}");
 
             Dispatcher.Invoke(() =>
             {
@@ -612,7 +641,7 @@ public class LootDistributionViewModel : TccWindowViewModel
                 if (_settings.AlwaysPass) itemVm.BidIntent = BidAction.Pass;
                 if (_settings.AlwaysRoll) itemVm.BidIntent = BidAction.Roll;
 
-                Log.CW($"  created item viewmodel {itemVm.Item.GameId}");
+                Trace($"  created item viewmodel {itemVm.Item.GameId}");
             });
         }
     }
@@ -623,7 +652,7 @@ public class LootDistributionViewModel : TccWindowViewModel
     private void OnSpawnDropitem(S_SPAWN_DROPITEM p)
     {
         if (_itemExclusions.Contains(p.ItemId)) return;
-        Log.CW($"> S_SPAWN_DROPITEM: gameId:{p.GameId} itemId:{p.ItemId} amount:{p.Amount}");
+        Trace($"> S_SPAWN_DROPITEM: gameId:{p.GameId} itemId:{p.ItemId} amount:{p.Amount}");
         _droppedItems[p.GameId] = new DropItem(p.GameId, p.ItemId, p.Amount);
     }
 
