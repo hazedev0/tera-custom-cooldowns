@@ -139,16 +139,18 @@ public class IconsUpdater
     {
         var idx = 1;
         var fails = 0;
+        var imagesPath = Path.Combine(App.ResourcesPath, "images");
         foreach (var icon in missing)
         {
             try
             {
-                var splitPath = icon.Split('\\');
-                var dir = splitPath.Last().Split('/')[0];
-                var iconName = splitPath.Last().Split('/')[1];
-                var url = $"https://github.com/Foglio1024/tera-used-icons/raw/master/{dir}/{iconName}";
+                // relative path can include subfolders, e.g. icon_emote/panda/emote_hi.png
+                var relativePath = Path.GetRelativePath(imagesPath, icon).Replace("\\", "/");
+                var url = $"https://github.com/Foglio1024/tera-used-icons/raw/master/{relativePath}";
+                var destPath = Path.Combine(imagesPath, relativePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
                 using var c = MiscUtils.GetDefaultHttpClient();
-                c.DownloadFileAsync(url, Path.Combine(App.ResourcesPath, "images", dir, iconName)).Wait();
+                c.DownloadFileAsync(url, destPath).Wait();
                 if (_n == null) continue;
                 _n.Progress = idx * 100 / (double)missing.Count;
                 _n.Message = $"Updating icons... ({idx}/{missing.Count})";
@@ -182,10 +184,10 @@ public class IconsUpdater
             if (!Directory.Exists(imagesPath)) Directory.CreateDirectory(imagesPath);
             ZipFile.ExtractToDirectory(Path.Combine(App.BasePath, "icons.zip"), App.BasePath);
             if (_n != null) _n.Message = "Creating directories...";
-            foreach (var dir in Directory.GetDirectories(DownloadedIconsDir, "*", SearchOption.AllDirectories).Select(Path.GetFileName))
+            foreach (var dir in Directory.GetDirectories(DownloadedIconsDir, "*", SearchOption.AllDirectories))
             {
-                Directory.CreateDirectory(Path.Combine(imagesPath,
-                    dir ?? throw new InvalidOperationException()));
+                // keep nested folders (e.g. icon_emote/panda) instead of flattening them
+                Directory.CreateDirectory(Path.Combine(imagesPath, Path.GetRelativePath(DownloadedIconsDir, dir)));
             }
 
             if (_n != null) _n.Message = "Copying icons...";

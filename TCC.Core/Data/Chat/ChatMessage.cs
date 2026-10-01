@@ -203,9 +203,9 @@ public class ChatMessage : ThreadSafeObservableObject, IDisposable
                 PlainMessage += piece.Text;
             }
         }
-        catch
+        catch (Exception e)
         {
-            // ignored
+            Log.F($"Failed to parse chat message: channel={ch} raw={msg}\n{e}");
         }
     }
 
@@ -309,7 +309,8 @@ public class ChatMessage : ThreadSafeObservableObject, IDisposable
 
     private void ParseDirectMessage(string msg)
     {
-        AddPiece(new SimpleMessagePiece(msg, App.Settings.FontSize, false));
+        // greet messages can contain emotes too
+        AddTextWithEmotes(msg, "");
     }
 
     private void ParseEmoteMessage(string msg)
@@ -376,13 +377,11 @@ public class ChatMessage : ThreadSafeObservableObject, IDisposable
                 var content = GetPieceContent(text);
                 if (content != "")
                 {
-                    AddPiece(
-                        new SimpleMessagePiece(
-                            content
-                                .Replace("<a href=\"asfunction:chatLinkAction\">", "")
-                                .Replace("</a>", "")
-                                .UnescapeHtml(), App.Settings.FontSize, false, customColor
-                        )
+                    AddTextWithEmotes(
+                        content
+                            .Replace("<a href=\"asfunction:chatLinkAction\">", "")
+                            .Replace("</a>", "")
+                            .UnescapeHtml(), customColor
                     );
                 }
             }
@@ -395,14 +394,62 @@ public class ChatMessage : ThreadSafeObservableObject, IDisposable
             CheckRedirect(text);
             var content = GetPieceContent(text);
             if (content == "") return;
-            var p = new SimpleMessagePiece(
+            AddTextWithEmotes(
                 content
                     .Replace("<a href=\"asfunction:chatLinkAction\">", "")
                     .Replace("</a>", "")
-                    .UnescapeHtml(), App.Settings.FontSize, false
+                    .UnescapeHtml(),
+                Channel == ChatChannel.ReceivedWhisper ? Brushes.GoldBrush.Color.ToHex() : ""
             );
-            if (Channel == ChatChannel.ReceivedWhisper) p.Color = Brushes.GoldBrush.Color.ToHex();
-            AddPiece(p);
+        }
+    }
+
+    // The client sends chat emotes as text placeholders instead of <img> tags:
+    // {@img#} src="img://__Icon_Emote.Panda.emote_surprised" width="24" height="24" ... {@img/#}
+    private static readonly Regex EmotePlaceholderRegex = new(@"\{@img#\}(.*?)\{@img/#\}", RegexOptions.Compiled);
+    // matches only the icon path, so it works however the src quotes are encoded (", &quot;, &#34;)
+    private static readonly Regex EmoteSourceRegex = new(@"img://__([A-Za-z0-9_.]+)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Adds text as message pieces, turning emote placeholders into icons.
+    /// </summary>
+    private void AddTextWithEmotes(string text, string color)
+    {
+        // UnescapeHtml() doesn't decode numeric entities (&#34;, &#123;), which can hide the placeholder
+        text = System.Net.WebUtility.HtmlDecode(text);
+        var last = 0;
+        var matches = EmotePlaceholderRegex.Matches(text);
+        if (matches.Count == 0 && text.Contains("@img"))
+            Log.F($"Chat text mentions @img but has no emote placeholder: {text}\nRaw message: {RawMessage}");
+        foreach (Match match in matches)
+        {
+            AddTextPiece(text[last..match.Index], color);
+            var source = EmoteSourceRegex.Match(match.Groups[1].Value);
+            if (source.Success)
+            {
+                AddPiece(new IconMessagePiece(source.Groups[1].Value.ToLower(), App.Settings.FontSize, false));
+            }
+            else
+            {
+                Log.F($"Unrecognized chat emote placeholder: {match.Value}\nRaw message: {RawMessage}");
+                AddTextPiece(match.Value, color);
+            }
+            last = match.Index + match.Length;
+        }
+        AddTextPiece(text[last..], color);
+    }
+
+    private void AddTextPiece(string text, string color)
+    {
+        // SplitSimplePieces() starts a new line before any piece containing "\n", so give each
+        // line break its own piece; otherwise text before the break (e.g. " = :nekohi:\n")
+        // moves to the next line, away from the emote it belongs to
+        var lines = text.Replace("\r\n", "\n").Split('\n');
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var line = i == 0 ? lines[i] : "\n" + lines[i];
+            if (line == "") continue;
+            AddPiece(new SimpleMessagePiece(line, App.Settings.FontSize, false, color));
         }
     }
 
