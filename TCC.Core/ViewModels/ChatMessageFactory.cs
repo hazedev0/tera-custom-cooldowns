@@ -26,6 +26,10 @@ public class ChatMessageFactory
     {
         return _dispatcher.InvokeAsync(() => new SystemMessage(template, msg, ch) { Author = authorOverride }).Result;
     }
+    public ChatMessage CreateTwitchMessage(string author, string text, string color, string emotesTag)
+    {
+        return _dispatcher.InvokeAsync(() => new TwitchChatMessage(author, text, color, emotesTag)).Result;
+    }
     public ChatMessage CreateLfgMessage(uint authorId, string author, string msg, uint serverId)
     {
         return _dispatcher.InvokeAsync(() => new LfgMessage(authorId, author, msg, serverId)).Result;

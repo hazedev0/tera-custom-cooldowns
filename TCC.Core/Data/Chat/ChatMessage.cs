@@ -137,6 +137,11 @@ public class ChatMessage : ThreadSafeObservableObject, IDisposable
     public int Size => App.Settings.FontSize;
     public string PlainMessage { get; protected init; }
     public string DisplayedAuthor { get; protected init; } = string.Empty;
+    /// <summary>
+    /// Author name color: the channel color unless a message sets its own (e.g. Twitch name colors).
+    /// </summary>
+    public System.Windows.Media.Brush AuthorBrush => CustomAuthorBrush ?? TccUtils.ChatChannelToBrush(Channel);
+    protected System.Windows.Media.Brush? CustomAuthorBrush { get; init; }
 
     #endregion Properties
 

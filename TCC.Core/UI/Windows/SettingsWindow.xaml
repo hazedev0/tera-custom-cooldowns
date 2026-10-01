@@ -1622,6 +1622,32 @@
                                     </ToolTip>
                                 </settings:SelectionSetting.ToolTip>
                             </settings:SelectionSetting>
+                            <settings:FieldSetting SettingName="Twitch channel"
+                                                   IsEnabled="{Binding ChatWindowEnabled}"
+                                                   Value="{Binding TwitchChannelName, Mode=TwoWay}">
+                                <settings:FieldSetting.ToolTip>
+                                    <Grid Margin="5">
+                                        <Border Style="{StaticResource RevampBorderStyle}" />
+                                        <TextBlock Foreground="LightGray" Margin="10" TextWrapping="Wrap"
+                                                   MaxWidth="200">
+                                            <Run Text="Shows this Twitch channel's chat in the Twitch chat channel (read-only, no login needed). Leave empty to disable." />
+                                        </TextBlock>
+                                    </Grid>
+                                </settings:FieldSetting.ToolTip>
+                            </settings:FieldSetting>
+                            <settings:CheckboxSetting SettingName="Animated Twitch emotes"
+                                                      IsEnabled="{Binding ChatWindowEnabled}"
+                                                      IsOn="{Binding TwitchAnimatedEmotes, Mode=TwoWay}">
+                                <settings:CheckboxSetting.ToolTip>
+                                    <Grid Margin="5">
+                                        <Border Style="{StaticResource RevampBorderStyle}" />
+                                        <TextBlock Foreground="LightGray" Margin="10" TextWrapping="Wrap"
+                                                   MaxWidth="200">
+                                            <Run Text="Plays animated Twitch, FFZ, BTTV and 7TV emotes. When off, they show their first frame, which uses less CPU." />
+                                        </TextBlock>
+                                    </Grid>
+                                </settings:CheckboxSetting.ToolTip>
+                            </settings:CheckboxSetting>
 
                         </StackPanel>
                         <!-- Actions -->

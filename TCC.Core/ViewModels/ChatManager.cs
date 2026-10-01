@@ -477,6 +477,15 @@ public class ChatManager : TccWindowViewModel
             }
     }
 
+    public void RefreshTwitchEmoteAnimation()
+    {
+        _dispatcher.InvokeAsync(() =>
+        {
+            foreach (var m in ChatMessages.ToSyncList().Concat(_pauseQueue).OfType<TwitchChatMessage>())
+                m.RefreshEmoteAnimation();
+        });
+    }
+
     public void ClearMessages()
     {
         Task.Factory.StartNew(() =>
@@ -676,6 +685,7 @@ public class ChatManager : TccWindowViewModel
             SynchronizationContext.SetSynchronizationContext(
                 new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
             Instance.InitWindows();
+            TwitchChat.Instance.Start(App.Settings.TwitchChannelName);
             App.AddDispatcher(Thread.CurrentThread.ManagedThreadId, Dispatcher.CurrentDispatcher);
             Dispatcher.Run();
             //Log.CW("[ChatWindow] Dispatcher stopped.");

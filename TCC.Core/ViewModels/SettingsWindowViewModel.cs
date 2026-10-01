@@ -12,6 +12,7 @@ using Nostrum;
 using Nostrum.WPF;
 using Nostrum.WPF.ThreadSafe;
 using TCC.Data;
+using TCC.Data.Chat;
 using TCC.Data.Databases;
 using TCC.Interop;
 using TCC.Interop.Proxy;
@@ -558,26 +559,6 @@ public class SettingsWindowViewModel : ThreadSafeObservableObject
         }
     }
 
-    public string TwitchUsername
-    {
-        get => App.Settings.TwitchName;
-        set
-        {
-            if (value == App.Settings.TwitchName) return;
-            App.Settings.TwitchName = value;
-            InvokePropertyChanged();
-        }
-    }
-    public string TwitchToken
-    {
-        get => App.Settings.TwitchToken;
-        set
-        {
-            if (value == App.Settings.TwitchToken) return;
-            App.Settings.TwitchToken = value;
-            InvokePropertyChanged();
-        }
-    }
     public string TwitchChannelName
     {
         get => App.Settings.TwitchChannelName;
@@ -586,6 +567,18 @@ public class SettingsWindowViewModel : ThreadSafeObservableObject
             if (value == App.Settings.TwitchChannelName) return;
             App.Settings.TwitchChannelName = value;
             InvokePropertyChanged();
+            TwitchChat.Instance.Start(value);
+        }
+    }
+    public bool TwitchAnimatedEmotes
+    {
+        get => App.Settings.TwitchAnimatedEmotes;
+        set
+        {
+            if (value == App.Settings.TwitchAnimatedEmotes) return;
+            App.Settings.TwitchAnimatedEmotes = value;
+            InvokePropertyChanged();
+            ChatManager.Instance.RefreshTwitchEmoteAnimation();
         }
     }
 

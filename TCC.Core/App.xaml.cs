@@ -15,6 +15,7 @@ using Nostrum;
 using Nostrum.Extensions;
 using Nostrum.WPF.Extensions;
 using TCC.Data;
+using TCC.Data.Chat;
 using TCC.Interop;
 using TCC.Interop.Proxy;
 using TCC.Notice;
@@ -240,6 +241,7 @@ public partial class App
         _running = false;
         PacketAnalyzer.Sniffer.Enabled = false;
         Settings.Save(wait: true);
+        TwitchChat.Instance.Stop();
         WindowManager.Dispose();
         StubInterface.Instance.Disconnect();
         UpdateManager.StopTimer();

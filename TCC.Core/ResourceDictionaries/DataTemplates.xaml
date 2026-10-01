@@ -5,6 +5,7 @@
                     xmlns:controls="clr-namespace:Nostrum.WPF.Controls;assembly=Nostrum.WPF"
                     xmlns:nsConv="clr-namespace:Nostrum.WPF.Converters;assembly=Nostrum.WPF"
                     xmlns:extensions="clr-namespace:Nostrum.WPF.Extensions;assembly=Nostrum.WPF"
+                    xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                     xmlns:data="clr-namespace:TCC.Data"
                     xmlns:abnormalities="clr-namespace:TCC.Data.Abnormalities"
@@ -198,6 +199,40 @@
     </DataTemplate>
 
 
+    <DataTemplate x:Key="TwitchEmoteImageTemplate" DataType="chat:TwitchEmoteMessagePiece">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+            <!-- shown until the image is loaded (or if it fails to load) -->
+            <TextBlock Foreground="{Binding Color, Converter={StaticResource StringToFill}}"
+                       Text="{Binding Text}"
+                       FontSize="{Binding Size}"
+                       FontFamily="{StaticResource NotoSansMed}"
+                       VerticalAlignment="Center"
+                       Visibility="{Binding ShowName, Converter={nsConv:BoolToVisibility}}" />
+            <Image Source="{Binding StaticImage}"
+                   Width="{Binding Width}" Height="{Binding Height}" Stretch="Uniform"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   Visibility="{Binding ShowStatic, Converter={nsConv:BoolToVisibility}}" />
+            <Image gif:AnimationBehavior.SourceUri="{Binding AnimatedImage}"
+                   Width="{Binding Width}" Height="{Binding Height}" Stretch="Uniform"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   Visibility="{Binding ShowAnimated, Converter={nsConv:BoolToVisibility}}" />
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="TwitchEmoteTemplate" DataType="chat:TwitchEmoteMessagePiece">
+        <Grid Margin="1 0" VerticalAlignment="Center" Background="Transparent" ToolTip="{Binding Description}">
+            <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource TwitchEmoteImageTemplate}" />
+            <!-- zero-width emotes, stacked over the base emote -->
+            <ItemsControl ItemsSource="{Binding Overlays}" ItemTemplate="{StaticResource TwitchEmoteImageTemplate}"
+                          IsHitTestVisible="False">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </Grid>
+    </DataTemplate>
+
     <DataTemplate x:Key="MessageHeaderTemplate">
         <chatControls:ChatMessageHeader />
     </DataTemplate>
@@ -317,7 +352,7 @@
                         StrokeThickness="3"                       
                         />-->
         <TextBlock Margin="3 0"
-                   Foreground="{Binding Channel, Converter={StaticResource ChatChannelToColor}}"
+                   Foreground="{Binding AuthorBrush}"
                    FontSize="{Binding Size}"
                    HorizontalAlignment="Stretch"
                    TextAlignment="Left"

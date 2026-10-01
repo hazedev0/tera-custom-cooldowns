@@ -16,6 +16,7 @@
                                          MoneyTemplate="{StaticResource MoneyTemplate}"
                                          ActionTemplate="{StaticResource ClickableTemplate}"
                                          IconTemplate="{StaticResource IconTemplate}"
+                                         TwitchEmoteTemplate="{StaticResource TwitchEmoteTemplate}"
                                          TranslationIndicatorTemplate="{StaticResource TranslationIndicatorTemplate}"
                                          />
     <templateSelectors:ChannelLabelDataTemplateSelector x:Key="ChannelLabelTemplateSelector"

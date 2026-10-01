@@ -156,14 +156,15 @@ public class SettingsContainer
 
     #region Twitch
 
-    [JsonIgnore]
-    public string TwitchName { get; set; } //TODO: re-add this
+    /// <summary>
+    /// Twitch channel whose chat is shown in TCC chat (read-only); empty to disable.
+    /// </summary>
+    public string TwitchChannelName { get; set; }
 
-    [JsonIgnore]
-    public string TwitchToken { get; set; } //TODO: re-add this
-
-    [JsonIgnore]
-    public string TwitchChannelName { get; set; } //TODO: re-add this
+    /// <summary>
+    /// Plays animated Twitch emotes; when off they show their first frame.
+    /// </summary>
+    public bool TwitchAnimatedEmotes { get; set; } = true;
 
     #endregion Twitch
 
@@ -219,8 +220,6 @@ public class SettingsContainer
         FontSize = 15;
         ChatScrollAmount = 1;
         LastRun = DateTime.MinValue;
-        TwitchName = "";
-        TwitchToken = "";
         TwitchChannelName = "";
         ShowTradeLfg = true;
         UseHotkeys = true;

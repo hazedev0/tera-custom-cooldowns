@@ -10,6 +10,7 @@ public class MessagePieceDataTemplateSelector : DataTemplateSelector
     public DataTemplate? ActionTemplate { get; set; }
     public DataTemplate? MoneyTemplate { get; set; }
     public DataTemplate? IconTemplate { get; set; }
+    public DataTemplate? TwitchEmoteTemplate { get; set; }
     public DataTemplate? UrlTemplate { get; set; }
     public DataTemplate? TranslationIndicatorTemplate { get; set; }
 
@@ -19,6 +20,7 @@ public class MessagePieceDataTemplateSelector : DataTemplateSelector
         {
             ActionMessagePiece => ActionTemplate,
             IconMessagePiece => IconTemplate,
+            TwitchEmoteMessagePiece => TwitchEmoteTemplate,
             MoneyMessagePiece => MoneyTemplate,
             UrlMessagePiece => ActionTemplate,
             TranslationIndicatorPiece => TranslationIndicatorTemplate,
