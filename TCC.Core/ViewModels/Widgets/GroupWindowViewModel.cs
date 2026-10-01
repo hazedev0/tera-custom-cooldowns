@@ -270,10 +270,6 @@ public class GroupWindowViewModel : TccWindowViewModel
             if (ab.Type is AbnormalityType.Buff or AbnormalityType.Special)
             {
                 u.AddOrRefreshBuff(ab, duration, stacks);
-                if (u.UserClass == Class.Warrior && ab.Id is >= 100200 and <= 100203)
-                {
-                    u.Role = Role.Tank; //def stance turned on: switch warrior to tank
-                }
             }
             else
             {
@@ -298,10 +294,6 @@ public class GroupWindowViewModel : TccWindowViewModel
             if (ab.Type is AbnormalityType.Buff or AbnormalityType.Special)
             {
                 u.RemoveBuff(ab);
-                if (u.UserClass == Class.Warrior && ab.Id is >= 100200 and <= 100203)
-                {
-                    u.Role = Role.Dps; //def stance ended: make warrior dps again
-                }
             }
             else
             {
@@ -314,7 +306,31 @@ public class GroupWindowViewModel : TccWindowViewModel
     {
         _dispatcher.Invoke(() =>
         {
-            Members.ToSyncList().FirstOrDefault(x => x.PlayerId == playerId && x.ServerId == serverId)?.ClearAbnormalities();
+            var u = Members.ToSyncList().FirstOrDefault(x => x.PlayerId == playerId && x.ServerId == serverId);
+            u?.ClearAbnormalities();
+            u?.ClearStanceAbnormalities();
+        });
+    }
+
+    /// <summary>
+    /// Tracks stance abnormalities, which decide the role of classes that can tank or deal damage.
+    /// Done for every abnormality, before the display filters: some stances are hidden or typed as debuffs.
+    /// </summary>
+    private void UpdateStance(uint playerId, uint serverId, uint abnormalityId, bool active)
+    {
+        _dispatcher.InvokeAsync(() =>
+        {
+            var u = Members.ToSyncList().FirstOrDefault(x => x.PlayerId == playerId && x.ServerId == serverId);
+            u?.SetStanceAbnormality(abnormalityId, active);
+        });
+    }
+
+    private void UpdateStance(ulong entityId, uint abnormalityId, bool active)
+    {
+        _dispatcher.InvokeAsync(() =>
+        {
+            var u = Members.ToSyncList().FirstOrDefault(x => x.EntityId == entityId);
+            u?.SetStanceAbnormality(abnormalityId, active);
         });
     }
 
@@ -645,6 +661,7 @@ public class GroupWindowViewModel : TccWindowViewModel
 
     private void UpdatePartyMemberAbnormality(uint playerId, uint serverId, uint id, uint duration, int stacks)
     {
+        UpdateStance(playerId, serverId, id, true);
         _dispatcher.InvokeAsync(() =>
         {
             if (!Game.DB!.AbnormalityDatabase.GetAbnormality(id, out var ab) || !ab.CanShow) return;
@@ -654,6 +671,7 @@ public class GroupWindowViewModel : TccWindowViewModel
 
     private void EndPartyMemberAbnormality(uint playerId, uint serverId, uint id)
     {
+        UpdateStance(playerId, serverId, id, false);
         _dispatcher.InvokeAsync(() =>
         {
             if (!Game.DB!.AbnormalityDatabase.GetAbnormality(id, out var ab) || !ab.CanShow) return;
@@ -741,6 +759,7 @@ public class GroupWindowViewModel : TccWindowViewModel
 
     private void OnAbnormalityBegin(S_ABNORMALITY_BEGIN p)
     {
+        UpdateStance(p.TargetId, p.AbnormalityId, true);
         if (Game.IsMe(p.TargetId))
         {
             if (Size > ((GroupWindowSettings)Settings!).DisableAbnormalitiesThreshold) return;
@@ -763,6 +782,7 @@ public class GroupWindowViewModel : TccWindowViewModel
 
     private void OnAbnormalityRefresh(S_ABNORMALITY_REFRESH p)
     {
+        UpdateStance(p.TargetId, p.AbnormalityId, true);
         if (!Game.IsMe(p.TargetId)) return;
 
         if (Size > ((GroupWindowSettings)Settings!).DisableAbnormalitiesThreshold) return;
@@ -774,6 +794,7 @@ public class GroupWindowViewModel : TccWindowViewModel
 
     private void OnAbnormalityEnd(S_ABNORMALITY_END p)
     {
+        UpdateStance(p.TargetId, p.AbnormalityId, false);
         if (!Game.DB!.AbnormalityDatabase.GetAbnormality(p.AbnormalityId, out var ab) || !ab.CanShow) return;
 
         if (Game.IsMe(p.TargetId))

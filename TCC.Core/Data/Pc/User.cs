@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -65,15 +66,62 @@ public class User : ThreadSafeObservableObject
         {
             if (!RaiseAndSetIfChanged(value, ref _userClass)) return;
 
-            Role = value switch
-            {
-                Class.Lancer => Role.Tank,
-                Class.Priest => Role.Healer,
-                Class.Mystic => Role.Healer,
-                Class.Brawler => Role.Tank,
-                _ => Role.Dps
-            };
+            UpdateRole();
         }
+    }
+
+    // stance abnormalities currently on this user, which decide the role of classes that can tank or deal damage
+    private readonly HashSet<uint> _stanceAbnormalities = [];
+
+    // Brawler: the skill advancement picks which Growing Fury they get, but it's only active in combat
+    private const uint BrawlerDpsGrowingFury = 10153561;
+    private static readonly uint[] BrawlerTankGrowingFury = [10153040, 10153571];
+
+    // last role seen from a brawler's Growing Fury, kept for the session so it holds out of combat
+    private static readonly ConcurrentDictionary<(uint PlayerId, uint ServerId), Role> BrawlerRoles = new();
+
+    /// <summary>
+    /// Whether this abnormality decides the role of the class.
+    /// </summary>
+    public static bool IsStanceAbnormality(Class c, uint id) => c switch
+    {
+        Class.Warrior => id is >= 100200 and <= 100203, // Defensive Stance: tank
+        Class.Berserker => id == 401400, // Intimidation: tank
+        Class.Brawler => id == BrawlerDpsGrowingFury || BrawlerTankGrowingFury.Contains(id),
+        _ => false
+    };
+
+    public void SetStanceAbnormality(uint id, bool active)
+    {
+        if (!IsStanceAbnormality(UserClass, id)) return;
+        if (active) _stanceAbnormalities.Add(id);
+        else _stanceAbnormalities.Remove(id);
+
+        if (active && UserClass == Class.Brawler)
+            BrawlerRoles[(PlayerId, ServerId)] = id == BrawlerDpsGrowingFury ? Role.Dps : Role.Tank;
+
+        UpdateRole();
+    }
+
+    public void ClearStanceAbnormalities()
+    {
+        _stanceAbnormalities.Clear();
+        UpdateRole();
+    }
+
+    private void UpdateRole()
+    {
+        var inStance = _stanceAbnormalities.Any(id => IsStanceAbnormality(UserClass, id));
+        Role = UserClass switch
+        {
+            Class.Lancer => Role.Tank,
+            Class.Priest => Role.Healer,
+            Class.Mystic => Role.Healer,
+            Class.Warrior or Class.Berserker => inStance ? Role.Tank : Role.Dps,
+            // keeps the last seen role after Growing Fury ends; tank until seen in combat
+            Class.Brawler => BrawlerRoles.GetValueOrDefault((PlayerId, ServerId), Role.Tank),
+            _ => Role.Dps
+        };
     }
     public Role Role
     {
@@ -95,12 +143,20 @@ public class User : ThreadSafeObservableObject
     public uint ServerId
     {
         get => _serverId;
-        set => RaiseAndSetIfChanged(value, ref _serverId);
+        set
+        {
+            if (!RaiseAndSetIfChanged(value, ref _serverId)) return;
+            UpdateRole();
+        }
     }
     public uint PlayerId
     {
         get => _playerId;
-        set => RaiseAndSetIfChanged(value, ref _playerId);
+        set
+        {
+            if (!RaiseAndSetIfChanged(value, ref _playerId)) return;
+            UpdateRole();
+        }
     }
     public int Order
     {
