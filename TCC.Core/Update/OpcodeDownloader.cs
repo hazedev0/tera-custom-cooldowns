@@ -78,7 +78,7 @@ public static class OpcodeDownloader
 
         try
         {
-            Download($"https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master/opcodes/protocol.{version}.map", filename);
+            Download($"{UpdateManager.DataRepoUrl}/opcodes/protocol.{version}.map", filename);
             ret = IsFileValid(filename);
         }
         catch { /* ignored*/ }
@@ -94,7 +94,7 @@ public static class OpcodeDownloader
         if (File.Exists(filename)) return true;
         try
         {
-            Download($"https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master/opcodes/sysmsg.{revision / 100}.map", filename);
+            Download($"{UpdateManager.DataRepoUrl}/opcodes/sysmsg.{revision / 100}.map", filename);
             return true;
         }
         catch { /* ignored*/ }
@@ -102,7 +102,7 @@ public static class OpcodeDownloader
         if (File.Exists(filename)) return true;
         try
         {
-            Download($"https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master/opcodes/sysmsg.{version}.map", filename);
+            Download($"{UpdateManager.DataRepoUrl}/opcodes/sysmsg.{version}.map", filename);
             return true;
         }
         catch { /* ignored*/ }

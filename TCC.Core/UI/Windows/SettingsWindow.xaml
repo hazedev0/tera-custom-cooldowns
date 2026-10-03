@@ -2556,7 +2556,7 @@
                             </Button>
                             <Button Style="{StaticResource SettingsButton}" HorizontalContentAlignment="Left"
                                     Command="{Binding BrowseUrlCommand}"
-                                    CommandParameter="https://github.com/Foglio1024/Tera-custom-cooldowns/releases">
+                                    CommandParameter="https://github.com/hazedev0/tera-custom-cooldowns/releases">
                                 <Grid Width="Auto" Height="Auto" Margin="0 0" HorizontalAlignment="Stretch"
                                       VerticalAlignment="Center">
                                     <Grid.ColumnDefinitions>
@@ -2576,7 +2576,7 @@
                             </Button>
                             <Button Style="{StaticResource SettingsButton}" HorizontalContentAlignment="Left"
                                     Command="{Binding BrowseUrlCommand}"
-                                    CommandParameter="https://github.com/Foglio1024/Tera-custom-cooldowns/issues">
+                                    CommandParameter="https://github.com/hazedev0/tera-custom-cooldowns/issues">
                                 <Grid Width="Auto" Height="Auto" Margin="0 0" HorizontalAlignment="Stretch"
                                       VerticalAlignment="Center">
                                     <Grid.ColumnDefinitions>

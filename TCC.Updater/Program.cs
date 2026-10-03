@@ -25,7 +25,7 @@ namespace TCC.Updater
             // delete temp folder
             Directory.Delete(SourcePath, true);
             // open release notes
-            Process.Start("explorer.exe", "https://github.com/Foglio1024/Tera-custom-cooldowns/releases");
+            Process.Start("explorer.exe", "https://github.com/hazedev0/tera-custom-cooldowns/releases");
             // launch TCC
             Process.Start(Path.GetDirectoryName(typeof(Program).Assembly.Location) + "/TCC.exe");
             // exit

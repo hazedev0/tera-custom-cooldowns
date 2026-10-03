@@ -13,7 +13,7 @@ namespace TCC.Notice;
 
 public static class NoticeChecker
 {
-    private const string Url = "https://raw.githubusercontent.com/Foglio1024/Tera-custom-cooldowns/master/messages.json";
+    private const string Url = "https://raw.githubusercontent.com/hazedev0/tera-custom-cooldowns/master/messages.json";
     private static List<NoticeBase> _notices = new();
     private static readonly Timer _checkTimer = new(60 * 5 * 1000);
 

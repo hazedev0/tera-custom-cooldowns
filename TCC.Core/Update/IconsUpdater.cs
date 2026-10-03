@@ -19,7 +19,7 @@ namespace TCC.Update;
 public class IconsUpdater
 {
     private static string DownloadedIconsDir => Path.Combine(App.BasePath, "tera-used-icons-master");
-    private const string IconsUrl = "https://github.com/Foglio1024/tera-used-icons/archive/master.zip";
+    private const string IconsUrl = "https://github.com/hazedev0/tera-used-icons/archive/master.zip";
 
     private ProgressNotificationInfo? _n;
 
@@ -42,7 +42,7 @@ public class IconsUpdater
         try
         {
             using var c = MiscUtils.GetDefaultHttpClient();
-            hashFile = await c.GetStringAsync(new Uri("https://github.com/Foglio1024/tera-used-icons/raw/master/hashes.json"));
+            hashFile = await c.GetStringAsync(new Uri("https://github.com/hazedev0/tera-used-icons/raw/master/hashes.json"));
         }
         catch (Exception e)
         {
@@ -146,7 +146,7 @@ public class IconsUpdater
             {
                 // relative path can include subfolders, e.g. icon_emote/panda/emote_hi.png
                 var relativePath = Path.GetRelativePath(imagesPath, icon).Replace("\\", "/");
-                var url = $"https://github.com/Foglio1024/tera-used-icons/raw/master/{relativePath}";
+                var url = $"https://github.com/hazedev0/tera-used-icons/raw/master/{relativePath}";
                 var destPath = Path.Combine(imagesPath, relativePath);
                 Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
                 using var c = MiscUtils.GetDefaultHttpClient();

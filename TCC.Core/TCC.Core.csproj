@@ -17,8 +17,8 @@
 		<Description>TERA Custom Cooldowns</Description>
 		<PackageIcon>tcc.ico</PackageIcon>
 		<PackageIconUrl />
-		<PackageProjectUrl>https://github.com/Foglio1024/Tera-custom-cooldowns</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/Foglio1024/Tera-custom-cooldowns</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/hazedev0/tera-custom-cooldowns</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/hazedev0/tera-custom-cooldowns</RepositoryUrl>
 		<Copyright>MIT</Copyright>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<NoWin32Manifest>true</NoWin32Manifest>
