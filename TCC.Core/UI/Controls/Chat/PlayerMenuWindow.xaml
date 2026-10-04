@@ -427,23 +427,23 @@
 
                     <Separator Margin="10 0" Background="#2fff" />
 
-                    <!-- Moongourd -->
-                    <Button Click="MoongourdClick" Margin="-1 0 -1 0" x:Name="MgButton" HorizontalAlignment="Stretch"
+                    <!-- Teralogs -->
+                    <Button Click="TeralogsClick" Margin="-1 0 -1 0" x:Name="TeralogsButton" HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
-                            Command="{Binding OpenMoongourdPopupCommand}"
-                            Visibility="{Binding ShowMgButtons, Converter={converters:BoolToVisibility}}">
+                            Command="{Binding OpenTeralogsPopupCommand}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
-                            <Popup Placement="Right" HorizontalOffset="5" VerticalOffset="-5" x:Name="MgPopup"
+                            <Popup Placement="Right" HorizontalOffset="5" VerticalOffset="-5" x:Name="TeralogsInfoPopup"
                                    AllowsTransparency="True">
-                                <chat:MoongourdPopup DataContext="{Binding MoongourdPopupViewModel}"/>
+                                <chat:TeralogsPopup DataContext="{Binding TeralogsPopupViewModel}"/>
                             </Popup>
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="{StaticResource MoongourdLogo}" Margin="4 6 2 6" />
-                                <TextBlock Text="Moongourd info" Margin="3" />
+                                <Path Data="{StaticResource SvgCrossedSwords}" Fill="{StaticResource TeralogsAccentBrush}"
+                                      Stretch="Uniform" Width="16" Margin="4 6 2 6" />
+                                <TextBlock Text="Teralogs info" Margin="3" />
                             </StackPanel>
                             <Path Data="{StaticResource SvgMenuRight}" HorizontalAlignment="Right"
                                   Opacity=".5" Margin="3 10 0 10" Height="Auto" Grid.Column="1" />

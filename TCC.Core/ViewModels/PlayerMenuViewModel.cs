@@ -32,7 +32,7 @@ public class PlayerMenuViewModel : ThreadSafeObservableObject
     private string _kickLabelText = "Kick";
     private string _gkickLabelText = "Kick from guild";
     private readonly PlayerMenuWindow _win;
-    public MoongourdPopupViewModel MoongourdPopupViewModel { get; }
+    public TeralogsPopupViewModel TeralogsPopupViewModel { get; }
 
     public event Action? UnfriendConfirmationRequested;
     public event Action? BlockConfirmationRequested;
@@ -145,10 +145,6 @@ public class PlayerMenuViewModel : ThreadSafeObservableObject
     public bool ShowGuildKick => Game.Guild.AmIMaster &&
                                  Game.Guild.Has(Name);
 
-    public bool ShowMgButtons => App.Settings.LastLanguage == "NA" ||
-                                 App.Settings.LastLanguage == "RU" ||
-                                 App.Settings.LastLanguage.StartsWith("EU");
-
     public bool Unfriending
     {
         get => _unfriending;
@@ -185,14 +181,14 @@ public class PlayerMenuViewModel : ThreadSafeObservableObject
     public ICommand MakeGuildMasterCommand { get; }
     public ICommand GuildKickCommand { get; }
     public ICommand HideShowPlayerCommand { get; }
-    public ICommand OpenMoongourdPopupCommand { get; }
+    public ICommand OpenTeralogsPopupCommand { get; }
 
     public PlayerMenuViewModel()
     {
         Name = "";
         Info = "";
         Level = 0;
-        MoongourdPopupViewModel = new MoongourdPopupViewModel();
+        TeralogsPopupViewModel = new TeralogsPopupViewModel();
 
         InspectCommand = new RelayCommand(_ =>
         {
@@ -349,9 +345,9 @@ public class PlayerMenuViewModel : ThreadSafeObservableObject
         {
             StubInterface.Instance.StubClient.InvokeCommand($"fps {cmd} {Name}");
         }, _ => StubInterface.Instance.IsStubAvailable && StubInterface.Instance.IsFpsModAvailable);
-        OpenMoongourdPopupCommand = new RelayCommand(_ =>
+        OpenTeralogsPopupCommand = new RelayCommand(_ =>
         {
-            MoongourdPopupViewModel.RequestInfo(Name, Game.Server.Region);
+            TeralogsPopupViewModel.RequestInfo(Name, Game.Server.Name);
         });
 
         _win = new PlayerMenuWindow(this);

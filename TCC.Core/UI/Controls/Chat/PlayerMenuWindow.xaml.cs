@@ -90,10 +90,10 @@ public partial class PlayerMenuWindow
     protected override void OnClosing(CancelEventArgs e)
     {
         e.Cancel = true;
-        if (MgPopup.IsMouseOver) return;
+        if (TeralogsInfoPopup.IsMouseOver) return;
         if (FpsUtilsPopup.IsMouseOver) return;
-        var popupsOpen = MgPopup.IsOpen || FpsUtilsPopup.IsOpen;
-        MgPopup.IsOpen = false;
+        var popupsOpen = TeralogsInfoPopup.IsOpen || FpsUtilsPopup.IsOpen;
+        TeralogsInfoPopup.IsOpen = false;
         FpsUtilsPopup.IsOpen = false;
         if (IsMouseOver && popupsOpen) return;
 
@@ -141,11 +141,9 @@ public partial class PlayerMenuWindow
         Close();
     }
 
-    private void MoongourdClick(object sender, RoutedEventArgs routedEventArgs)
+    private void TeralogsClick(object sender, RoutedEventArgs routedEventArgs)
     {
-        //var p = MgPopup.Child as MoongourdPopup;
-        //p?.SetInfo(_vm.Name, App.Settings.LastLanguage);
-        MgPopup.IsOpen = true;
+        TeralogsInfoPopup.IsOpen = true;
     }
 
     private void FpsUtilsClick(object sender, RoutedEventArgs routedEventArgs)

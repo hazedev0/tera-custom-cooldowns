@@ -79,11 +79,11 @@
     <Color x:Key="Tier4DungeonColor">              #FC946F   </Color>
     <Color x:Key="Tier5DungeonColor">              #FC6F6F   </Color>
                                                              
-    <Color x:Key="MoongourdBackgroundColor">       #34495E   </Color>
-    <Color x:Key="MoongourdDarkBackgroundColor">   #2A3F54   </Color>
-    <Color x:Key="MoongourdHeaderColor">           #3B5167   </Color>
-    <Color x:Key="MoongourdAccentColor">           #26B99A   </Color>
-    <Color x:Key="MoongourdFadedAccentColor">      #1B9190   </Color>
+    <Color x:Key="TeralogsBackgroundColor">       #34495E   </Color>
+    <Color x:Key="TeralogsDarkBackgroundColor">   #2A3F54   </Color>
+    <Color x:Key="TeralogsHeaderColor">           #3B5167   </Color>
+    <Color x:Key="TeralogsAccentColor">           #26B99A   </Color>
+    <Color x:Key="TeralogsFadedAccentColor">      #1B9190   </Color>
                                                              
     <Color x:Key="AbnormalityBuffColor">           #3F9FFF   </Color>
     <Color x:Key="AbnormalityStunColor">           #FF0000   </Color>

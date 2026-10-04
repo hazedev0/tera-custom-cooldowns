@@ -80,11 +80,11 @@
     <SolidColorBrush x:Key="Tier4DungeonBrush"              Color="{StaticResource Tier4DungeonColor}"                         />
     <SolidColorBrush x:Key="Tier5DungeonBrush"              Color="{StaticResource Tier5DungeonColor}"                         />
                                                                                                                                
-    <SolidColorBrush x:Key="MoongourdBackgroundBrush"       Color="{StaticResource MoongourdBackgroundColor}"                  />
-    <SolidColorBrush x:Key="MoongourdDarkBackgroundBrush"   Color="{StaticResource MoongourdDarkBackgroundColor}"              />
-    <SolidColorBrush x:Key="MoongourdHeaderBrush"           Color="{StaticResource MoongourdHeaderColor}"                      />
-    <SolidColorBrush x:Key="MoongourdAccentBrush"           Color="{StaticResource MoongourdAccentColor}"                      />
-    <SolidColorBrush x:Key="MoongourdFadedAccentBrush"      Color="{StaticResource MoongourdFadedAccentColor}"                 />
+    <SolidColorBrush x:Key="TeralogsBackgroundBrush"       Color="{StaticResource TeralogsBackgroundColor}"                  />
+    <SolidColorBrush x:Key="TeralogsDarkBackgroundBrush"   Color="{StaticResource TeralogsDarkBackgroundColor}"              />
+    <SolidColorBrush x:Key="TeralogsHeaderBrush"           Color="{StaticResource TeralogsHeaderColor}"                      />
+    <SolidColorBrush x:Key="TeralogsAccentBrush"           Color="{StaticResource TeralogsAccentColor}"                      />
+    <SolidColorBrush x:Key="TeralogsFadedAccentBrush"      Color="{StaticResource TeralogsFadedAccentColor}"                 />
                                                                                                                                
     <SolidColorBrush x:Key="RunemarkBrush"                  Color="{StaticResource RunemarkColor}"                             />
     <SolidColorBrush x:Key="MaxRunemarkBrush"               Color="{StaticResource MaxRunemarkColor}"                          />
