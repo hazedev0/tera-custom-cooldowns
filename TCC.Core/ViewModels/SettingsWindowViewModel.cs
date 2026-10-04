@@ -347,6 +347,26 @@ public class SettingsWindowViewModel : ThreadSafeObservableObject
             InvokePropertyChanged();
         }
     }
+    public int MaxWhisperMessages
+    {
+        get => App.Settings.MaxWhisperMessages;
+        set
+        {
+            if (App.Settings.MaxWhisperMessages == value) return;
+            App.Settings.MaxWhisperMessages = value == 0 ? int.MaxValue : value;
+            InvokePropertyChanged();
+        }
+    }
+    public int MaxSystemMessages
+    {
+        get => App.Settings.MaxSystemMessages;
+        set
+        {
+            if (App.Settings.MaxSystemMessages == value) return;
+            App.Settings.MaxSystemMessages = value == 0 ? int.MaxValue : value;
+            InvokePropertyChanged();
+        }
+    }
     public int ChatScrollAmount
     {
         get => App.Settings.ChatScrollAmount;

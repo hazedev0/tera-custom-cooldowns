@@ -145,7 +145,18 @@ public class SettingsContainer
     public bool ShowTimestamp { get; set; }
     public bool ChatTimestampSeconds { get; set; }
     public bool AnimateChatMessages { get; set; }
+    /// <summary>
+    /// Maximum amount of player messages kept in chat (everything except whispers and system messages).
+    /// </summary>
     public int MaxMessages { get; set; }
+    /// <summary>
+    /// Maximum amount of whispers kept in chat.
+    /// </summary>
+    public int MaxWhisperMessages { get; set; }
+    /// <summary>
+    /// Maximum amount of system messages (loot, damage, exp, notices...) kept in chat.
+    /// </summary>
+    public int MaxSystemMessages { get; set; }
     public int SpamThreshold { get; set; }
     public int FontSize { get; set; }
     public int ChatScrollAmount { get; set; }
@@ -214,6 +225,8 @@ public class SettingsContainer
         _lootDistributionWindowSettings = new LootDistributionWindowSettings();
 
         MaxMessages = 500;
+        MaxWhisperMessages = 200;
+        MaxSystemMessages = 500;
         SpamThreshold = 2;
         ShowChannel = true;
         ShowTimestamp = true;

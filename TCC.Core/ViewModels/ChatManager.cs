@@ -409,7 +409,7 @@ public class ChatManager : TccWindowViewModel
 #if BATCH
                     _mainQueue.Enqueue(chatMessage);
 #else
-                ChatMessages.Insert(0, chatMessage);
+                InsertMessage(chatMessage);
 #endif
             }
             else
@@ -422,16 +422,54 @@ public class ChatManager : TccWindowViewModel
             NewMessage?.Invoke(chatMessage);
 #if BATCH
 #else
-            if (ChatMessages.Count > App.Settings.MaxMessages)
-            {
-                var toRemove = ChatMessages[^1];
-                toRemove.Dispose();
-                ChatMessages.RemoveAt(ChatMessages.Count - 1);
-            }
-
             InvokePropertyChanged(nameof(MessageCount));
 #endif
         }, DispatcherPriority.DataBind);
+    }
+
+    /// <summary>
+    /// Whispers, system messages and player messages have separate limits, so a flood of one kind
+    /// (e.g. loot rolls in a raid) doesn't push the others out of chat.
+    /// </summary>
+    private enum MessageGroup { Player, Whisper, System }
+
+    private readonly int[] _groupCounts = new int[3];
+
+    private static MessageGroup GetGroup(ChatMessage message)
+    {
+        if (message.Channel is ChatChannel.SentWhisper or ChatChannel.ReceivedWhisper) return MessageGroup.Whisper;
+        return message.Author == "System" ? MessageGroup.System : MessageGroup.Player;
+    }
+
+    private static int GetMaxMessages(MessageGroup group)
+    {
+        return group switch
+        {
+            MessageGroup.Whisper => App.Settings.MaxWhisperMessages,
+            MessageGroup.System => App.Settings.MaxSystemMessages,
+            _ => App.Settings.MaxMessages
+        };
+    }
+
+    private void InsertMessage(ChatMessage message)
+    {
+        ChatMessages.Insert(0, message);
+        var group = GetGroup(message);
+        _groupCounts[(int)group]++;
+
+        // delete the oldest messages of the same group
+        for (var i = ChatMessages.Count - 1; i >= 0 && _groupCounts[(int)group] > GetMaxMessages(group); i--)
+        {
+            if (GetGroup(ChatMessages[i]) == group) RemoveMessageAt(i);
+        }
+    }
+
+    private void RemoveMessageAt(int index)
+    {
+        var message = ChatMessages[index];
+        ChatMessages.RemoveAt(index);
+        _groupCounts[(int)GetGroup(message)]--;
+        message.Dispose();
     }
 
     public void AddTccMessage(string message)
@@ -470,10 +508,8 @@ public class ChatManager : TccWindowViewModel
 #if BATCH
                     _mainQueue.Enqueue(msg);
 #else
-                ChatMessages.Insert(0, msg);
+                InsertMessage(msg);
 #endif
-                if (ChatMessages.Count > App.Settings.MaxMessages)
-                    ChatMessages.RemoveAt(ChatMessages.Count - 1);
             }
     }
 
@@ -496,8 +532,7 @@ public class ChatManager : TccWindowViewModel
                 var idx = i;
                 _dispatcher?.InvokeAsync(() =>
                 {
-                    ChatMessages.RemoveAt(idx);
-                    list[idx].Dispose();
+                    if (idx < ChatMessages.Count) RemoveMessageAt(idx);
                 });
                 Thread.Sleep(1);
             }
