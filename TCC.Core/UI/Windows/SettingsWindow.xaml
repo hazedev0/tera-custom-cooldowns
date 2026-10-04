@@ -2118,7 +2118,6 @@
                             <ContentControl Template="{StaticResource SectionHeaderTemplate}" 
                                             Content="Mentions" />
                             <settings:CheckboxSetting SettingName="Enabled"
-                                                      IsEnabled="{Binding BackgroundNotifications}"
                                                       IsOn="{Binding WebhookEnabledMentions, Mode=TwoWay}" />
                             <settings:FieldSetting SettingName="Webhook"
                                                    IsEnabled="{Binding WebhookEnabledMentions}"
