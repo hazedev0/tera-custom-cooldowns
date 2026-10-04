@@ -158,11 +158,19 @@ public class User : ThreadSafeObservableObject
             UpdateRole();
         }
     }
+    /// <summary>
+    /// Slot in the party/raid window; in a raid, slots 0-4 are party 1, 5-9 party 2 and so on.
+    /// </summary>
     public int Order
     {
         get => _order;
-        set => RaiseAndSetIfChanged(value, ref _order);
+        set
+        {
+            if (!RaiseAndSetIfChanged(value, ref _order)) return;
+            InvokePropertyChanged(nameof(Party));
+        }
     }
+    public int Party => Order / 5 + 1;
     public bool CanInvite
     {
         get => _canInvite;

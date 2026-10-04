@@ -124,6 +124,7 @@
                        ToolTipService.ShowDuration="50000"
                        VerticalAlignment="Center" HorizontalAlignment="Left" Margin="3,-2,0,2" FontSize="12"
                        Grid.Row="0" Grid.Column="0">
+                <Run Text="{Binding Party, StringFormat=P{0}, Mode=OneWay}" FontSize="10" Foreground="#bfff" ToolTip="Party" />
                 <Run Text="{Binding Level}" FontSize="10" Foreground="#6fff" />
                 <Run Text="{Binding Name, Mode=OneWay}" FontSize="12" />
                 <TextBlock.ToolTip>
