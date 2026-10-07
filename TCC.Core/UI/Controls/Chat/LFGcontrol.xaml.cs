@@ -60,8 +60,7 @@ public partial class LfgControl
         }
 
         if (_dc == null) return;
-        ChatManager.Instance.LastClickedLfg = _dc;
-        StubInterface.Instance.StubClient.RequestPartyInfo(_dc.Id, _dc.ServerId); //ProxyOld.RequestPartyInfo(_dc.Id);
+        WindowManager.ViewModels.LfgVM.RequestPartyInfo(_dc.Id, _dc.ServerId);
     }
 
     //private void UserControl_MouseEnter(object sender, MouseEventArgs e)

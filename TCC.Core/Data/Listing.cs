@@ -175,7 +175,7 @@ public class Listing : ThreadSafeObservableObject
                 if (!IsExpanded) return;
 
                 WindowManager.ViewModels.LfgVM.LastClicked = this; // todo: maybe remove this reference (event?)
-                StubInterface.Instance.StubClient.RequestPartyInfo(LeaderId, ServerId);
+                WindowManager.ViewModels.LfgVM.RequestPartyInfo(LeaderId, ServerId);
             }
             else
             {
@@ -194,7 +194,7 @@ public class Listing : ThreadSafeObservableObject
             else
             {
                 WindowManager.ViewModels.LfgVM.LastClicked = this; // todo: maybe remove this reference (event?)
-                StubInterface.Instance.StubClient.RequestPartyInfo(LeaderId, ServerId);
+                WindowManager.ViewModels.LfgVM.RequestPartyInfo(LeaderId, ServerId);
             }
         }
     }

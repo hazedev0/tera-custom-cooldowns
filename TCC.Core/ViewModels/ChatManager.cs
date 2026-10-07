@@ -45,7 +45,6 @@ public class ChatManager : TccWindowViewModel
     public event Action<ChatMessage>? NewMessage;
     public event Action<int>? PrivateChannelJoined;
 
-    public Lfg? LastClickedLfg { get; set; }
 
     public int MessageCount => ChatMessages.Count;
     public int QueuedMessagesCount => _pauseQueue.Count;
@@ -643,20 +642,23 @@ public class ChatManager : TccWindowViewModel
         LFGs.Remove(lfg);
     }
 
-    public void RemoveDeadLfg()
+    public void RemoveDeadLfg(uint leaderId)
     {
-        if (LastClickedLfg == null) return;
-        RemoveLfg(LastClickedLfg);
-        LastClickedLfg = null;
+        var lfg = LFGs.ToSyncList().FirstOrDefault(x => x.Id == leaderId);
+        if (lfg != null) RemoveLfg(lfg);
+    }
+
+    public void RemoveMissingLfgs(HashSet<uint> listedLeaderIds)
+    {
+        foreach (var lfg in LFGs.ToSyncList().Where(x => !listedLeaderIds.Contains(x.Id))) RemoveLfg(lfg);
     }
 
     private bool TryGetLfg(uint id, string msg, string name, out Lfg? lfg)
     {
-        lfg = LFGs.ToSyncList().FirstOrDefault(x => x.Id == id);
-        if (lfg != null) return true;
-        lfg = LFGs.ToSyncList().FirstOrDefault(x => x.Name == name);
-        if (lfg != null) return false;
-        lfg = LFGs.ToSyncList().FirstOrDefault(x => x.Message == msg);
+        var lfgs = LFGs.ToSyncList();
+        lfg = lfgs.FirstOrDefault(x => x.Id == id)
+              ?? (name == "" ? null : lfgs.FirstOrDefault(x => x.Name == name))
+              ?? (msg == "" ? null : lfgs.FirstOrDefault(x => x.Message == msg));
         return lfg != null;
     }
 

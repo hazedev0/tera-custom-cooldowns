@@ -130,12 +130,13 @@ public static class SystemMessagesProcessor
 
     private static void HandleInvalidLink(string parameters, SystemMessageData template)
     {
-        if (App.Settings.LfgWindowSettings.Enabled)
-            WindowManager.ViewModels.LfgVM.RemoveDeadLfg();
+        var deadLeaderId = WindowManager.ViewModels.LfgVM.RemoveDeadLfg(out var userRequested);
 
         if (!App.Settings.ChatEnabled) return;
 
-        ChatManager.Instance.RemoveDeadLfg();
+        ChatManager.Instance.RemoveDeadLfg(deadLeaderId);
+        // background checks of the LFG list shouldn't print "link no longer valid" in chat
+        if (!userRequested) return;
         ChatManager.Instance.AddChatMessage(ChatManager.Instance.Factory.CreateSystemMessage(parameters, template, (ChatChannel)template.ChatChannel));
     }
 

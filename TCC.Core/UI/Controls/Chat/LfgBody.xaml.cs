@@ -23,7 +23,7 @@ public partial class LfgBody
             if (WindowManager.LfgListWindow.IsVisible) StubInterface.Instance.StubClient.RequestListings(App.Settings.LfgWindowSettings.MinLevel, App.Settings.LfgWindowSettings.MaxLevel);
             else WindowManager.LfgListWindow.ShowWindow();
         }
-        StubInterface.Instance.StubClient.RequestPartyInfo(dc.AuthorId, dc.ServerId); 
+        WindowManager.ViewModels.LfgVM.RequestPartyInfo(dc.AuthorId, dc.ServerId);
     }
 
     private void ButtonBase_OnClick(object sender, RoutedEventArgs e)

@@ -46,6 +46,12 @@ public class LfgListViewModel : TccWindowViewModel
 
     private readonly DispatcherTimer AutoPublicizeTimer;
     private static readonly Queue<(uint, uint)> _requestQueue = new();
+    private static readonly TimeSpan DeadListingMemory = TimeSpan.FromMinutes(5);
+    // listings the game said are gone, kept out of the list even if the server still sends them
+    private readonly Dictionary<uint, DateTime> _deadLeaderIds = [];
+    private uint _pendingInfoLeaderId;
+    private bool _pendingInfoFromUser;
+    private bool _verifyOnNextSync;
     private bool _creating;
     private bool _creatingRaid;
     private int _lastGroupSize;
@@ -226,7 +232,7 @@ public class LfgListViewModel : TccWindowViewModel
         SortCommand = new SortCommand(ListingsView);
         PublicizeCommand = new RelayCommand(_ => Publicize(), _ => CanPublicize());
         ToggleAutoPublicizeCommand = new RelayCommand(_ => ToggleAutoPublicize(), _ => CanToggleAutoPublicize());
-        ReloadCommand = new RelayCommand(_ => StubInterface.Instance.StubClient.RequestListings(App.Settings.LfgWindowSettings.MinLevel, App.Settings.LfgWindowSettings.MaxLevel));
+        ReloadCommand = new RelayCommand(_ => Reload());
         RemoveMessageCommand = new RelayCommand(_ => RemoveMessage());
         CreateMessageCommand = new RelayCommand(_ => CreateMessage(), _ => CanCreateMessage());
         ExpandAllCommand = new RelayCommand(_ => ExpandAll());
@@ -313,6 +319,12 @@ public class LfgListViewModel : TccWindowViewModel
         Listings.Insert(0, listing);
         //RefreshSorting();
         TempLfgCreated?.Invoke();
+    }
+
+    private void Reload()
+    {
+        _verifyOnNextSync = true;
+        StubInterface.Instance.StubClient.RequestListings(App.Settings.LfgWindowSettings.MinLevel, App.Settings.LfgWindowSettings.MaxLevel);
     }
 
     private void RemoveMessage()
@@ -425,7 +437,7 @@ public class LfgListViewModel : TccWindowViewModel
         }
         else
         {
-            StubInterface.Instance.StubClient.RequestPartyInfo(playerId, serverId); //ProxyOld.RequestPartyInfo(req);
+            RequestPartyInfo(playerId, serverId, fromUser: false);
         }
     }
 
@@ -444,10 +456,33 @@ public class LfgListViewModel : TccWindowViewModel
         Task.Delay(500).ContinueWith(_ => _dispatcher.Invoke(NotifyMyLfg));
     }
 
-    internal void RemoveDeadLfg()
+    public void RequestPartyInfo(uint leaderId, uint serverId, bool fromUser = true)
     {
-        if (LastClicked == null) return;
-        Listings.Remove(LastClicked);
+        _pendingInfoLeaderId = leaderId;
+        _pendingInfoFromUser = fromUser;
+        StubInterface.Instance.StubClient.RequestPartyInfo(leaderId, serverId);
+    }
+
+    /// <summary>
+    /// Called when the game answers the last party info request with "link no longer valid".
+    /// Removes that listing and returns its leader id (0 if no request was pending).
+    /// </summary>
+    internal uint RemoveDeadLfg(out bool fromUser)
+    {
+        var leaderId = _pendingInfoLeaderId;
+        fromUser = _pendingInfoFromUser || leaderId == 0;
+        _pendingInfoLeaderId = 0;
+        if (leaderId == 0) return 0;
+
+        lock (_deadLeaderIds) _deadLeaderIds[leaderId] = DateTime.Now;
+        var target = Listings.ToSyncList().FirstOrDefault(l => l.LeaderId == leaderId && !l.Temp);
+        if (target != null) Listings.Remove(target);
+        return leaderId;
+    }
+
+    private bool IsDead(uint leaderId)
+    {
+        lock (_deadLeaderIds) return _deadLeaderIds.ContainsKey(leaderId);
     }
 
     public void EnqueueListRequest()
@@ -469,32 +504,33 @@ public class LfgListViewModel : TccWindowViewModel
 
     private void SyncListings(List<ListingData> listings)
     {
-        Task.Factory.StartNew(() =>
+        var verify = _verifyOnNextSync;
+        _verifyOnNextSync = false;
+        _dispatcher.InvokeAsync(() =>
         {
-            _dispatcher.InvokeAsync(() => ActualListingsAmount = listings.Count);
-            RemoveMissingListings();
-            foreach (var l in listings) _dispatcher.InvokeAsync(() => AddOrRefreshListing(l));
-        });
-        return;
+            ActualListingsAmount = listings.Count;
 
-        void RemoveMissingListings()
-        {
-            var toRemove = from l in Listings.ToSyncList()
-                           where listings.All(f => f.LeaderId != l.LeaderId) && !l.Temp 
-                           select l.LeaderId;
-
-            foreach (var r in toRemove)
+            lock (_deadLeaderIds)
             {
-                _dispatcher.InvokeAsync(() =>
-                {
-                    var target = Listings.FirstOrDefault(rm => rm.LeaderId == r);
-                    if (target != null) Listings.Remove(target);
-                });
+                // forget a dead listing once the server stops sending it, or after a while in case its leader made a new one
+                var forget = _deadLeaderIds.Where(d => DateTime.Now - d.Value > DeadListingMemory
+                                                       || listings.All(l => l.LeaderId != d.Key))
+                                           .Select(d => d.Key).ToList();
+                foreach (var id in forget) _deadLeaderIds.Remove(id);
             }
-        }
+
+            var alive = listings.Where(l => !IsDead(l.LeaderId)).ToList();
+
+            var toRemove = Listings.ToSyncList().Where(l => !l.Temp && alive.All(f => f.LeaderId != l.LeaderId)).ToList();
+            foreach (var l in toRemove) Listings.Remove(l);
+
+            foreach (var l in alive) AddOrRefreshListing(new Listing(l), verify);
+
+            ChatManager.Instance.RemoveMissingLfgs(alive.Select(l => l.LeaderId).ToHashSet());
+        });
     }
 
-    public void AddOrRefreshListing(Listing l)
+    public void AddOrRefreshListing(Listing l, bool verify = false)
     {
         if (Listings.ToSyncList().Any(toFind => toFind.LeaderId == l.LeaderId))
         {
@@ -506,7 +542,8 @@ public class LfgListViewModel : TccWindowViewModel
             target.IsRaid = l.IsRaid;
             target.LeaderName = l.LeaderName;
             target.ExN(nameof(Listing.AliveSinceMs));
-            if (target.PlayerCount != l.PlayerCount) EnqueueRequest(l.LeaderId, l.ServerId);
+            // the server can keep sending a listing whose party is gone; asking for its info is what tells
+            if (verify || target.PlayerCount != l.PlayerCount) EnqueueRequest(l.LeaderId, l.ServerId);
         }
         else
         {
@@ -523,11 +560,6 @@ public class LfgListViewModel : TccWindowViewModel
         return words.Any(w =>
             BlacklistedWords.Any(b =>
                 w.ToLowerInvariant().Contains(b.ToLowerInvariant())));
-    }
-
-    private void AddOrRefreshListing(ListingData l)
-    {
-        AddOrRefreshListing(new Listing(l));
     }
 
     private void OnHideTradeChanged()
@@ -612,6 +644,8 @@ public class LfgListViewModel : TccWindowViewModel
     private void OnPartyMemberInfo(S_PARTY_MEMBER_INFO m)
     {
         //if (!App.Settings.LfgWindowSettings.Enabled) return;
+        if (m.Id == _pendingInfoLeaderId || m.Members.Any(p => p.PlayerId == _pendingInfoLeaderId)) _pendingInfoLeaderId = 0;
+        lock (_deadLeaderIds) _deadLeaderIds.Remove(m.Id);
         try
         {
             var lfg = Listings.ToSyncList().FirstOrDefault(listing => listing.LeaderId == m.Id
@@ -730,9 +764,8 @@ public class LfgListViewModel : TccWindowViewModel
 
         //Log.CW($"S_SHOW_PARTY_MATCH_INFO is last {m.Page + 1}/{m.Pages + 1}");
 
-        if (S_SHOW_PARTY_MATCH_INFO.Listings.Count != 0)
-            SyncListings(S_SHOW_PARTY_MATCH_INFO.Listings);
-        //else Log.CW("No listings to show.");
+        // sync even when empty, so the last listings disappear too; copy because the parser reuses the list
+        SyncListings(S_SHOW_PARTY_MATCH_INFO.Listings.ToList());
 
         NotifyMyLfg();
 
