@@ -117,6 +117,7 @@ public class LootDistributionWindowSettings : WindowSettingsBase
         _visible = false;
         _enabled = true;
         _autoDim = true;
+        _dimOpacity = .5;
         _showAlways = true;
         _autoShowUponRoll = true;
         IgnoreSize = false;

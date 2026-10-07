@@ -260,6 +260,7 @@ public class LootDistributionViewModel : TccWindowViewModel
         }
         TimeLeft = 59;
         ItemsLeftAmount = 0;
+        _settings.ForcedVisible = false;
     }
 
     private void OnDelaySettingChanged(int newValue)
@@ -408,6 +409,9 @@ public class LootDistributionViewModel : TccWindowViewModel
         Trace($"> S_ASK_BIDDING_RARE_ITEM: itemId:{m.ItemId} amount:{m.Amount}");
 
         if (_clear.IsEnabled) _clear.Stop();
+
+        // don't let auto-dim fade the window out while there's something to roll on
+        _settings.ForcedVisible = true;
 
         foreach (var member in Members)
         {
