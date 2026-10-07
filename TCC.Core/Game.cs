@@ -213,7 +213,6 @@ public static class Game
     {
         if (App.Settings.DisableDataUpdates)
         {
-            // without remote hashes, CheckVersion() skips the hash check and local files are kept
             Log.F("Data updates are disabled in settings, using local databases.");
         }
         else
@@ -227,7 +226,8 @@ public static class Game
         {
             DB = new TccDatabases(lang);
         }
-        DB!.CheckVersion();
+        // with updates disabled there are no remote hashes to compare with, and local files are kept
+        if (!App.Settings.DisableDataUpdates) DB!.CheckVersion();
         if (DB.IsUpToDate == false)
         {
             if (!App.Loading)

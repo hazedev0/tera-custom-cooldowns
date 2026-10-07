@@ -35,11 +35,8 @@ public abstract class DatabaseBase
         }
 
         var localHash = HashUtils.GenerateFileHash(string.IsNullOrEmpty(customAbsPath) ? FullPath : customAbsPath);
-        if (UpdateManager.DatabaseHashes.Count == 0)
-        {
-            Log.F("No database hashes in update manager. Skipping hash check.");
-            return;
-        }
+        // the hashes failed to download; CheckDatabaseHash already logged it
+        if (UpdateManager.DatabaseHashes.Count == 0) return;
 
         if (!UpdateManager.DatabaseHashes.TryGetValue(string.IsNullOrEmpty(customRelPath) ? RelativePath : customRelPath, out var remoteHash))
         {
