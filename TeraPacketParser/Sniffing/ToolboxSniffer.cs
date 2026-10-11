@@ -2,6 +2,7 @@
 using Nostrum.Extensions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using TCC.Utils;
@@ -38,6 +39,7 @@ public class ToolboxSniffer : ITeraSniffer
         public async Task<ServerInfo> GetServer()
         {
             var resp = await _client.CallAsync("getServerInfo"); // todo: update after meter
+            if (resp?.Error != null) return await GetServerFromId();
             try
             {
                 return resp?.Result?.Value<JObject>()?.ToObject<ServerInfo>() ?? default;
@@ -46,6 +48,17 @@ public class ToolboxSniffer : ITeraSniffer
             {
                 return default;                
             }
+        }
+
+        // external-interface from before December 2023 (still shipped with some Toolboxes, like Agaia's)
+        // has no getServerInfo, only getServer, which returns the server id: take the rest from servers.txt
+        private async Task<ServerInfo> GetServerFromId()
+        {
+            var resp = await _client.CallAsync("getServer");
+            var id = resp?.Result?.Value<uint>() ?? 0;
+            if (id == 0) return default;
+            var server = PacketAnalyzer.ServerDatabase.GetServer(id);
+            return new ServerInfo(id, "", server.Name, server.Ip, 0);
         }
         /// <summary>
         /// Requests <c>ttb-interface-control</c> to return current release version.
@@ -76,12 +89,27 @@ public class ToolboxSniffer : ITeraSniffer
         /// <returns>true if successful</returns>
         public async Task<bool> DumpMap(string path, string mapType)
         {
-            var resp = await _client.CallAsync("dumpMapSync", new JObject
+            var args = new JObject
             {
                 { "path", path},
                 { "mapType", mapType }
-            });
-            return resp?.Result != null && resp.Result.Value<bool>();
+            };
+            var resp = await _client.CallAsync("dumpMapSync", args);
+            if (resp?.Error == null) return resp?.Result != null && resp.Result.Value<bool>();
+
+            // external-interface from before July 2022 only has dumpMap, which returns before the file is written
+            resp = await _client.CallAsync("dumpMap", args);
+            if (resp?.Result == null || !resp.Result.Value<bool>()) return false;
+            var size = -1L;
+            for (var i = 0; i < 50; i++)
+            {
+                await Task.Delay(100);
+                if (!File.Exists(path)) continue;
+                var newSize = new FileInfo(path).Length;
+                if (newSize > 0 && newSize == size) return true;
+                size = newSize;
+            }
+            return File.Exists(path);
         }
         /// <summary>
         /// Requests <c>ttb-interface-control</c> to install hooks for the provided list of opcodes.
@@ -157,9 +185,16 @@ public class ToolboxSniffer : ITeraSniffer
             return resp?.Result?.Value<uint>() ?? 0U;
         }
 
-        internal async Task<string> GetLanguage()
+        /// <summary>
+        /// Requests <c>ttb-interface-control</c> to return the region of the current connection.
+        /// </summary>
+        /// <param name="serverId">used to find the region in servers.txt if this external-interface
+        /// predates getLanguage (December 2023)</param>
+        /// <returns>region ("EU", "RU"...)</returns>
+        internal async Task<string> GetLanguage(uint serverId)
         {
             var resp = await _client.CallAsync("getLanguage");
+            if (resp?.Error != null) return PacketAnalyzer.ServerDatabase.GetServer(serverId).Region;
             return resp?.Result?.Value<string>() ?? "";
         }
     }
@@ -299,7 +334,7 @@ public class ToolboxSniffer : ITeraSniffer
                 Connected = true;
                 await ControlConnection.AddHooks(PacketAnalyzer.Factory!.OpcodesList);
                 PacketAnalyzer.Factory.ReleaseVersion = await ControlConnection.GetReleaseVersion();
-                NewConnection?.Invoke(new Server(resp.name, await ControlConnection.GetLanguage(), resp.address, resp.id));
+                NewConnection?.Invoke(new Server(resp.name, await ControlConnection.GetLanguage(resp.id), resp.address, resp.id));
                 _dataConnection = new TcpClient();
                 await _dataConnection.ConnectAsync("127.0.0.60", 5301);
             }

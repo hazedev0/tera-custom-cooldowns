@@ -17,9 +17,21 @@ public class OpCodeNamer
 
     public OpCodeNamer(IEnumerable<KeyValuePair<ushort, string>> names)
     {
-        var namesArray = names.ToArray();
-        _opCodeNames = namesArray.ToDictionary(parts => parts.Key, parts => parts.Value);
-        _opCodeCodes = namesArray.ToDictionary(parts => parts.Value, parts => parts.Key);
+        (_opCodeNames, _opCodeCodes) = BuildMaps(names);
+    }
+
+    // Some Toolboxes add aliases, a second name for an opcode that already has one (Agaia's has
+    // C_CANCEL_SKILL_STRICTLYY next to C_CANCEL_SKILL_STRICTLY): keep the first name and code seen.
+    private static (Dictionary<ushort, string>, Dictionary<string, ushort>) BuildMaps(IEnumerable<KeyValuePair<ushort, string>> names)
+    {
+        var byCode = new Dictionary<ushort, string>();
+        var byName = new Dictionary<string, ushort>();
+        foreach (var (code, name) in names)
+        {
+            byCode.TryAdd(code, name);
+            byName.TryAdd(name, code);
+        }
+        return (byCode, byName);
     }
 
     public OpCodeNamer(string filename) : this(ReadOpCodeFile(filename).Result)
@@ -67,9 +79,7 @@ public class OpCodeNamer
         if (!File.Exists(filename)) filename = $"{p}/sysmsg.{releaseVersion / 100}.map";
         if (!File.Exists(filename)) return;
 
-        var namesArray = ReadOpCodeFile(filename).Result.ToArray();
-        _opCodeNames = namesArray.ToDictionary(parts => parts.Key, parts => parts.Value);
-        _opCodeCodes = namesArray.ToDictionary(parts => parts.Value, parts => parts.Key);
+        (_opCodeNames, _opCodeCodes) = BuildMaps(ReadOpCodeFile(filename).Result);
     }
 
     public void Add(string name, ushort code)
