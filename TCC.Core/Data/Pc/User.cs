@@ -80,12 +80,19 @@ public class User : ThreadSafeObservableObject
     // last role seen from a brawler's Growing Fury, kept for the session so it holds out of combat
     private static readonly ConcurrentDictionary<(uint PlayerId, uint ServerId), Role> BrawlerRoles = new();
 
+    // Warrior: Infuriate locks them in Defensive Stance, so it shows they're tanking even when the
+    // stance abnormality was missed or wrongly cleared; it ending doesn't mean they left the stance
+    private const uint WarriorInfuriate = 102500;
+
+    // Infuriate was seen and no Defensive Stance end has been seen since
+    private bool _infuriateSeen;
+
     /// <summary>
     /// Whether this abnormality decides the role of the class.
     /// </summary>
     public static bool IsStanceAbnormality(Class c, uint id) => c switch
     {
-        Class.Warrior => id is >= 100200 and <= 100203, // Defensive Stance: tank
+        Class.Warrior => id is >= 100200 and <= 100203 or WarriorInfuriate, // Defensive Stance: tank
         Class.Berserker => id == 401400, // Intimidation: tank
         Class.Brawler => id == BrawlerDpsGrowingFury || BrawlerTankGrowingFury.Contains(id),
         _ => false
@@ -97,6 +104,16 @@ public class User : ThreadSafeObservableObject
         if (active) _stanceAbnormalities.Add(id);
         else _stanceAbnormalities.Remove(id);
 
+        if (id == WarriorInfuriate)
+        {
+            if (active) _infuriateSeen = true;
+        }
+        else if (!active && UserClass == Class.Warrior && !_stanceAbnormalities.Contains(WarriorInfuriate))
+        {
+            // they really left Defensive Stance
+            _infuriateSeen = false;
+        }
+
         if (active && UserClass == Class.Brawler)
             BrawlerRoles[(PlayerId, ServerId)] = id == BrawlerDpsGrowingFury ? Role.Dps : Role.Tank;
 
@@ -106,12 +123,14 @@ public class User : ThreadSafeObservableObject
     public void ClearStanceAbnormalities()
     {
         _stanceAbnormalities.Clear();
+        _infuriateSeen = false;
         UpdateRole();
     }
 
     private void UpdateRole()
     {
-        var inStance = _stanceAbnormalities.Any(id => IsStanceAbnormality(UserClass, id));
+        var inStance = _stanceAbnormalities.Any(id => IsStanceAbnormality(UserClass, id))
+                       || (UserClass == Class.Warrior && _infuriateSeen);
         Role = UserClass switch
         {
             Class.Lancer => Role.Tank,
