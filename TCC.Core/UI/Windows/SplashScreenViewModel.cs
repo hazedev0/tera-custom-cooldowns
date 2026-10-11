@@ -40,8 +40,7 @@ public class SplashScreenViewModel : ThreadSafeObservableObject
         set => RaiseAndSetIfChanged(value, ref _bottomText);
     }
 
-    public string Version => App.AppVersion.Replace("TCC ", "").Replace("-b", "");
-    public bool Beta => App.Beta;
+    public string Version => App.AppVersion.Replace("TCC ", "");
     public bool Toolbox => App.ToolboxMode;
 
     public bool Answer { get; private set; }

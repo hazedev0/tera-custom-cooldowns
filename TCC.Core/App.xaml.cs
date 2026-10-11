@@ -39,8 +39,6 @@ public partial class App
     private static bool _running;
     private static Mutex? _mutex;
 
-    public static bool Beta => GlobalFlags.IsBeta;
-
     /// <summary>
     ///     Version in the "TCC vX.Y.Z-b" format.
     /// </summary>
@@ -200,11 +198,6 @@ public partial class App
         // ----------------------------
         Log.Chat($"{AppVersion} ready.");
         ReadyEvent?.Invoke();
-
-        if (!Beta && Settings.BetaNotification && UpdateManager.IsBetaNewer())
-        {
-            Log.N("TCC beta available", SR.BetaAvailable, NotificationType.Success, 10000);
-        }
     }
 
     private static void ParseStartupArgs(IList<string> args)

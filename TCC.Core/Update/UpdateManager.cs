@@ -23,7 +23,6 @@ namespace TCC.Update;
 public static class UpdateManager
 {
     private const string AppVersionUrl = "https://raw.githubusercontent.com/hazedev0/tera-custom-cooldowns/master/version";
-    private const string AppVersionBetaUrl = "https://raw.githubusercontent.com/hazedev0/tera-custom-cooldowns/beta/version";
     /// <summary>
     /// Game data (and its hash file) lives in its own repo, so data can be updated without a TCC release.
     /// </summary>
@@ -73,25 +72,6 @@ public static class UpdateManager
             if (App.SplashScreen.VM.AskUpdate("Failed to download database hashes. Try again?")) await CheckDatabaseHash();
         }
     }
-    public static bool IsBetaNewer()
-    {
-        try
-        {
-            using var c = MiscUtils.GetDefaultHttpClient();
-
-            var req = c.GetStreamAsync(AppVersionBetaUrl);
-            req.Wait();
-            var st = req.Result;
-            var newVersionInfo = new StreamReader(st).ReadLine();
-            if (newVersionInfo == null) return false;
-            if (Version.Parse(newVersionInfo) > Assembly.GetExecutingAssembly().GetName().Version) return true;
-        }
-        catch (Exception e)
-        {
-            Log.F($"[IsBetaNewer] Failed to check beta version {e}");
-        }
-        return false;
-    }
     public static void UpdateDatabase(string relativePath)
     {
         try
@@ -113,35 +93,6 @@ public static class UpdateManager
     {
         _checkTimer.Elapsed += CheckTimer_Elapsed;
         _checkTimer.Start();
-    }
-    public static async void ForceUpdateToBeta()
-    {
-        using var c = MiscUtils.GetDefaultHttpClient();
-        try
-        {
-            var vp = new VersionParser(forceBeta: true);
-            if (!vp.Valid) return;
-
-            Log.N("TCC update manager", "Download started", NotificationType.Info, 3000);
-            await c.DownloadFileAsync(vp.NewVersionUrl, "update.zip");
-
-            Log.N("TCC update manager", "Extracting zip", NotificationType.Info, 3000);
-            if (Directory.Exists(Path.Combine(App.BasePath, "tmp"))) Directory.Delete(Path.Combine(App.BasePath, "tmp"), true);
-            ZipFile.ExtractToDirectory("update.zip", Path.Combine(App.BasePath, "tmp"));
-
-            Log.N("TCC update manager", "Moving files", NotificationType.Info, 2000);
-            File.Move(Path.Combine(App.BasePath, "tmp/TCCupdater.exe"), Path.Combine(App.BasePath, "TCCupdater.exe"));
-
-            Log.N("TCC update manager", "Starting updater", NotificationType.Info, 1000);
-            await Task.Delay(1000).ContinueWith(_ => Process.Start(Path.GetDirectoryName(typeof(App).Assembly.Location) + "/TCCupdater.exe", "update"));
-            Environment.Exit(0);
-        }
-        catch (Exception ex)
-        {
-            Log.F($"Error while checking updates. \nException: {ex.Message}\n{ex.StackTrace}");
-            if (TccMessageBox.Show(SR.UpdateCheckFailed, MessageBoxType.ConfirmationWithYesNo) != MessageBoxResult.Yes) return;
-            ForceUpdateToBeta();
-        }
     }
     public static void StopTimer()
     {
@@ -263,13 +214,13 @@ public static class UpdateManager
         public bool IsNewer => Version > Assembly.GetExecutingAssembly().GetName().Version;
         public bool Valid { get; }
 
-        public VersionParser(bool forceBeta = false)
+        public VersionParser()
         {
             NewVersionNumber = "";
             NewVersionUrl = "";
 
             using var c = MiscUtils.GetDefaultHttpClient();
-            var req = c.GetStreamAsync(App.Beta || forceBeta ? AppVersionBetaUrl : AppVersionUrl);
+            var req = c.GetStreamAsync(AppVersionUrl);
             req.Wait();
             var st = req.Result;
 

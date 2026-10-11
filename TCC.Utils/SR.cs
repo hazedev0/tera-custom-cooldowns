@@ -21,8 +21,6 @@ public static class SR
     public const string ServersFileDownloadFailed     = "Failed to download servers file. Try again?";
     public const string CannotReadCharacters          = "There was an error while reading characters file (more info in error.log). \nManually correct the error and press Ok to try again, else press Cancel to delete current data.";
     public const string RestartToApplySetting         = "TCC needs to be restarted to apply this setting. Restart now?";
-    public const string BetaUnstableWarning           = "Warning: beta build could be unstable. Proceed?";
-    public const string BetaAvailable                 = "A beta version of TCC is available. Open System settings to download it or to disable this notification.";
     public const string UpdatingDatabase              = "Some database files are out of date, updating... Contact the developer if you see this message at every login.";
     public const string BgMatchingComplete            = "Battleground matching completed";
     public const string DungMatchingComplete          = "Dungeon matching completed";

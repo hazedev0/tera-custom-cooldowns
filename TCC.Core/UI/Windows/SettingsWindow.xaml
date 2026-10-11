@@ -2331,16 +2331,6 @@
                                     </Grid>
                                 </settings:CheckboxSetting.ToolTip>
                             </settings:CheckboxSetting>
-                            <settings:CheckboxSetting SettingName="Beta builds notification"
-                                                      IsOn="{Binding BetaNotification, Mode=TwoWay}"
-                                                      IsEnabled="{Binding Beta, Converter={StaticResource BoolInverter}}" />
-                            <Button Content="Download beta build"
-                                    Style="{StaticResource SettingsButton}"
-                                    Command="{Binding DownloadBetaCommand}"
-                                    Background="{StaticResource TccRedGradientBrush}"
-                                    Foreground="White"
-                                    IsEnabled="{Binding Beta, Converter={StaticResource BoolInverter}}"
-                            />
                         </StackPanel>
 
                         <StackPanel Grid.Row="1" Grid.Column="1">

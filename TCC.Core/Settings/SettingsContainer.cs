@@ -47,7 +47,6 @@ public class SettingsContainer
     public bool ShowIngameChat { get; set; }
     public bool CheckOpcodesHash { get; set; }
     public bool CheckGuildBamWithoutOpcode { get; set; } //by HQ 20190324
-    public bool BetaNotification { get; set; }
     public bool FpsAtGuardian { get; set; }
     public bool IntegratedGpuSleepWorkaround { get; set; }
     public bool DisableDataUpdates { get; set; } // keeps local databases and icons instead of checking/downloading remote ones
@@ -257,7 +256,6 @@ public class SettingsContainer
         CheckOpcodesHash = true;
         CheckGuildBamWithoutOpcode = false;
         UserExcludedSysMsg = new List<string>();
-        BetaNotification = true;
         FpsAtGuardian = true;
         EnableProxy = true;
         DisableLfgChatMessages = true;

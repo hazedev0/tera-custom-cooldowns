@@ -90,10 +90,6 @@
                     <Run Text="TCC" FontWeight="DemiBold" FontSize="36"/>
                     <Run Text="{Binding Version, Mode=OneWay}"/>
                     </TextBlock>
-                    <TextBlock Text="-b"  HorizontalAlignment="Stretch" TextAlignment="Left" Margin="0 0 0 2" 
-                           FontSize="26" Foreground="{StaticResource DpsRoleBrush}" FontWeight="Thin" VerticalAlignment="Bottom"
-                           Visibility="{Binding Beta, Converter={converters:BoolToVisibility}}" 
-                           />
                 </StackPanel>
                 <Separator Margin="0 -6 -20 3" Background="#3acf" />
                 <TextBlock HorizontalAlignment="Stretch" TextAlignment="Right" Margin="0 -6 -20 0" FontSize="12" Foreground="#7fff" FontWeight="Thin">

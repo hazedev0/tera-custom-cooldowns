@@ -174,12 +174,12 @@ public static class TccUtils
     /// <summary>
     /// Retrieves TCC version from the executing assembly.
     /// </summary>
-    /// <returns>TCC version as "TCC vX.Y.Z-b"</returns>
+    /// <returns>TCC version as "TCC vX.Y.Z"</returns>
     public static string GetTccVersion()
     {
         var v = Assembly.GetExecutingAssembly().GetName().Version;
         if (v == null) throw new InvalidOperationException("Unable to retrieve TCC version.");
-        return $"TCC v{v.Major}.{v.Minor}.{v.Build}{(App.Beta ? "-b" : "")}";
+        return $"TCC v{v.Major}.{v.Minor}.{v.Build}";
     }
 
     public static string GradeToColorString(RareGrade g)

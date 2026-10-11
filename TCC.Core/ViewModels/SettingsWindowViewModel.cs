@@ -37,7 +37,6 @@ public class SettingsWindowViewModel : ThreadSafeObservableObject
     public static event Action? TranslationModeChanged;
     public static event Action? IntegratedGpuSleepWorkaroundChanged;
 
-    public bool Beta => App.Beta;
     public bool ToolboxMode => App.ToolboxMode;
 
     public CooldownWindowSettings CooldownWindowSettings => App.Settings.CooldownWindowSettings;
@@ -56,7 +55,6 @@ public class SettingsWindowViewModel : ThreadSafeObservableObject
 
     public ICommand BrowseUrlCommand { get; }
     public ICommand OpenWindowCommand { get; }
-    public ICommand DownloadBetaCommand { get; }
     public ICommand ResetChatPositionsCommand { get; }
     public ICommand MakePositionsGlobalCommand { get; }
     public ICommand ResetWindowPositionsCommand { get; }
@@ -245,16 +243,6 @@ public class SettingsWindowViewModel : ThreadSafeObservableObject
         {
             if (App.Settings.DisableLfgChatMessages == value) return;
             App.Settings.DisableLfgChatMessages = value;
-            InvokePropertyChanged();
-        }
-    }
-    public bool BetaNotification
-    {
-        get => App.Settings.BetaNotification;
-        set
-        {
-            if (App.Settings.BetaNotification == value) return;
-            App.Settings.BetaNotification = value;
             InvokePropertyChanged();
         }
     }
@@ -810,13 +798,6 @@ public class SettingsWindowViewModel : ThreadSafeObservableObject
         OpenWelcomeWindowCommand = new RelayCommand(_ =>
         {
             new WelcomeWindow().Show();
-        });
-        DownloadBetaCommand = new RelayCommand(async _ =>
-        {
-            if (TccMessageBox.Show(SR.BetaUnstableWarning, MessageBoxType.ConfirmationWithYesNo) == MessageBoxResult.Yes)
-            {
-                await Task.Factory.StartNew(UpdateManager.ForceUpdateToBeta);
-            }
         });
         ResetChatPositionsCommand = new RelayCommand(_ =>
         {
