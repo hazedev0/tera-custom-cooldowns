@@ -11,7 +11,7 @@
 		<OutputType>WinExe</OutputType>
 		<UseWindowsForms>true</UseWindowsForms>
 		<UseWPF>true</UseWPF>
-		<Authors>Foglio</Authors>
+		<Authors>Foglio, hazedev0</Authors>
 		<Company>Foglio</Company>
 		<Version>1.4.166</Version>
 		<Description>TERA Custom Cooldowns</Description>
@@ -125,7 +125,8 @@
 		<!--<Reference Include="System.Net.Http" />-->
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="..\LICENSE" Visible="False" Pack="True" />
+		<!-- MIT: the license ships with every copy of TCC -->
+		<None Include="..\LICENSE" Link="LICENSE" Visible="False" Pack="True" CopyToOutputDirectory="PreserveNewest" />
 		<Resource Include="resources\fonts\ArialMono-Bold.ttf" />
 		<Resource Include="resources\fonts\Frutiger.ttf" />
 		<Resource Include="resources\fonts\NotoSans-Medium.ttf" />

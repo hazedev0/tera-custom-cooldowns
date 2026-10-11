@@ -2,7 +2,7 @@
   "servers": [ "https://raw.githubusercontent.com/hazedev0/tcc-toolbox-release/master/" ],
   "supportUrl": "https://github.com/hazedev0/tera-custom-cooldowns/issues",
   "name": "TCC",
-  "author": "Foglio",
+  "author": "Foglio, hazedev0",
   "description": "UI replacement with some extra features.",
   "disableAutoUpdate": false,
   "keywords": ["client"],

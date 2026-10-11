@@ -2576,7 +2576,7 @@
                                         VerticalAlignment="Center"
                                         Margin="5 0"
                                         Data="{StaticResource SvgGitHub}" MaxWidth="16" />
-                                    <TextBlock Text="Wiki"
+                                    <TextBlock Text="Wiki (by Foglio)"
                                                Grid.Column="1" Margin="0" />
                                 </Grid>
 
@@ -2627,26 +2627,6 @@
                             <ContentControl Template="{StaticResource SectionHeaderTemplate}" Content="Discord" />
                             <Button Style="{StaticResource SettingsButton}" HorizontalContentAlignment="Left"
                                     Command="{Binding BrowseUrlCommand}"
-                                    CommandParameter="https://discord.gg/anUXQTp">
-                                <Grid Width="Auto" Height="Auto" Margin="0 0" HorizontalAlignment="Stretch"
-                                      VerticalAlignment="Center">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition />
-                                    </Grid.ColumnDefinitions>
-                                    <Path
-                                        Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Margin="5 0"
-                                        Data="{StaticResource SvgDiscord}" MaxWidth="16" />
-                                    <TextBlock Text="Tera DPS (main TCC discord)"
-                                               Grid.Column="1" Margin="0" />
-                                </Grid>
-
-                            </Button>
-                            <Button Style="{StaticResource SettingsButton}" HorizontalContentAlignment="Left"
-                                    Command="{Binding BrowseUrlCommand}"
                                     CommandParameter="https://discord.gg/dUNDDtw"
                                     Background="{StaticResource ToolboxBrush}">
                                 <Grid Width="Auto" Height="Auto" Margin="0 0" HorizontalAlignment="Stretch"
@@ -2691,7 +2671,7 @@
                             </Button>
                             <Button Style="{StaticResource SettingsButton}" 
                                     Command="{Binding BrowseUrlCommand}"
-                                    CommandParameter="https://github.com/Foglio1024/S1UI_chat2/blob/master/p75/S1UI_Chat2.gpk"
+                                    CommandParameter="https://github.com/hazedev0/tcc-toolbox-release/tree/master/client/gpk"
                                     HorizontalContentAlignment="Left"
                                     >
                                 <Grid Width="Auto" Height="Auto" Margin="0 0" HorizontalAlignment="Stretch"
@@ -2706,7 +2686,7 @@
                                         VerticalAlignment="Center"
                                         Margin="5 0"
                                         Data="{StaticResource SvgGitHub}" MaxWidth="16" />
-                                    <TextBlock Text="S1UI_Chat2.gpk for TCC" Grid.Column="1" />
+                                    <TextBlock Text="S1UI_Chat2.gpk for TCC (x64 / x86)" Grid.Column="1" />
                                 </Grid>
                             </Button>
                             <Button Style="{StaticResource SettingsButton}" HorizontalContentAlignment="Left"
@@ -2727,29 +2707,10 @@
                                     <TextBlock Text="TERA Modern UI" Grid.Column="1" />
                                 </Grid>
                             </Button>
-                            <Button Style="{StaticResource SettingsButton}"
-                                    HorizontalContentAlignment="Left"
-                                    Command="{Binding BrowseUrlCommand}"
-                                    CommandParameter="https://tcc-web-99a64.firebaseapp.com/">
-                                <Grid Width="Auto" Height="Auto" Margin="0 0" HorizontalAlignment="Stretch"
-                                      VerticalAlignment="Center">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition />
-                                    </Grid.ColumnDefinitions>
-                                    <Path
-                                        Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Margin="7 0"
-                                        Data="{StaticResource SvgOpenLink}" MaxWidth="12" />
-                                    <TextBlock Text="Guild BAM times" Grid.Column="1" />
-                                </Grid>
-                            </Button>
                         </StackPanel>
                         <!-- Discord -->
                         <StackPanel Grid.Column="1">
-                            <ContentControl Template="{StaticResource SectionHeaderTemplate}" Content="Donate" />
+                            <ContentControl Template="{StaticResource SectionHeaderTemplate}" Content="Donate to Foglio" />
                             <Button Style="{StaticResource SettingsButton}" 
                                     HorizontalContentAlignment="Left"
                                     Background="{StaticResource GoldBrush}"
@@ -2771,6 +2732,15 @@
                                                Grid.Column="1" Margin="0" />
                                 </Grid>
                             </Button>
+                        </StackPanel>
+                        <!-- About -->
+                        <StackPanel Grid.Column="1" Grid.Row="1">
+                            <ContentControl Template="{StaticResource SectionHeaderTemplate}" Content="About" />
+                            <TextBlock Foreground="#afff" TextWrapping="Wrap" Margin="10 5">
+                                <Run>TCC was created by Foglio. This version is maintained by hazedev0.</Run>
+                                <LineBreak />
+                                <Run>Report bugs and ask for help in its GitHub issues.</Run>
+                            </TextBlock>
                         </StackPanel>
                     </Grid>
                 </TabItem>

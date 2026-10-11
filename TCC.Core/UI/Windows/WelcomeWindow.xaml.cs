@@ -28,11 +28,11 @@ public partial class WelcomeWindow
         }
     }
 
-    private void OnTeraDpsDiscordButtonClick(object sender, RoutedEventArgs e)
+    private void OnIssuesButtonClick(object sender, RoutedEventArgs e)
     {
         try
         {
-            Utils.Utilities.OpenUrl("https://discord.gg/anUXQTp");
+            Utils.Utilities.OpenUrl("https://github.com/hazedev0/tera-custom-cooldowns/issues");
         }
         catch 
         {

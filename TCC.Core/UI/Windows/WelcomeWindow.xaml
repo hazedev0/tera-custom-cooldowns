@@ -58,6 +58,8 @@
                    TextWrapping="Wrap" Width="450">
             <Run>TCC is a standalone tool acting as an overlay for TERA.</Run>
             <LineBreak />
+            <Run>TCC was created by Foglio. This version is maintained by hazedev0.</Run>
+            <LineBreak />
             <LineBreak />
             <Run>You can open settings by double-clicking the tray icon:</Run>
             <Image Source="../../resources/tcc_on.ico" Height="16" Stretch="Uniform" Margin="0 0 0 -3" />
@@ -70,11 +72,9 @@
             <Run>before asking questions.</Run>
             <LineBreak />
             <LineBreak />
-            <Run>If you need further help you can ask in</Run>
-            <Run Foreground="{StaticResource GoldBrush}" FontWeight="DemiBold">TERA Dps discord</Run>
-            <Run>or</Run>
-            <Run Foreground="{StaticResource GoldBrush}" FontWeight="DemiBold">TERA Toolbox discord</Run>
-            <Run>(links in settings).</Run>
+            <Run>To report a bug or ask for help, open an issue on</Run>
+            <Run Foreground="{StaticResource GoldBrush}" FontWeight="DemiBold">GitHub</Run>
+            <Run>(link in settings).</Run>
         </TextBlock>
         <StackPanel Grid.Column="1" Grid.Row="1"
                     Margin="-5 5 5 5"
@@ -123,17 +123,11 @@
                     BorderBrush="{StaticResource RevampBorderBrush}"
                     Background="{StaticResource RevampDarkerBackground70Brush}"
                     BorderThickness="1"
-                    Click="OnTeraDpsDiscordButtonClick">
-                <Grid Margin="5">
-                    <Ellipse  HorizontalAlignment="Right"
-                               VerticalAlignment="Center"
-                               Width="45" Height="45" Margin="0">
-                        <Ellipse.Fill>
-                            <ImageBrush ImageSource="../../resources/images/shinrameter.png"
-                                        Stretch="Uniform"/>
-                        </Ellipse.Fill>
-                    </Ellipse>                    
-                    <TextBlock Text="Shinra Meter and TCC Discord"
+                    Click="OnIssuesButtonClick">
+                <Grid VerticalAlignment="Center">
+                    <Path Data="{StaticResource SvgGitHub}" Fill="White" HorizontalAlignment="Right"
+                          VerticalAlignment="Center" Width="35" Height="35" Margin="5" Stretch="Uniform" />
+                    <TextBlock Text="Report a bug or ask for help"
                                Foreground="White"
                                Width="80"
                                Margin="6 0"

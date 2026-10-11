@@ -3,7 +3,7 @@
     <OutputType>WinExe</OutputType>
     <AssemblyName>TCCupdater</AssemblyName>
     <RootNamespace>TCC.Updater</RootNamespace>
-    <Authors>Foglio</Authors>
+    <Authors>Foglio, hazedev0</Authors>
     <Company>Foglio</Company>
     <TargetFramework>net48</TargetFramework>
     <UseWPF>true</UseWPF>
