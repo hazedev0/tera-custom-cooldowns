@@ -187,24 +187,6 @@ public sealed partial class DebugWindow : INotifyPropertyChanged
 
     }
 
-    private void RegisterWebhook(object sender, RoutedEventArgs e)
-    {
-        for (var i = 0; i < 80; i++)
-        {
-            var i1 = i;
-            Dispatcher.InvokeAsync(() => Tester.RegisterWebhook("user" + i1));
-        }
-    }
-
-    private void FireWebhook(object sender, RoutedEventArgs e)
-    {
-        for (var i = 0; i < 80; i++)
-        {
-            var i1 = i;
-            Dispatcher.InvokeAsync(() => Tester.FireWebhook("user" + i1));
-        }
-    }
-
     private void DungeonTest(object sender, RoutedEventArgs e)
     {
         //i = 0;
